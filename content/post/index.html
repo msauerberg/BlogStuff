@@ -1,0 +1,206 @@
+---
+title: "Reconstructing all life table functions from $e_x$"
+author: "Markus Sauerberg"
+date: '2021-07-04T21:13:14-05:00'
+categories: R
+tags:
+- R Markdown
+- Demoragphy
+---
+
+
+
+
+<div id="deriving-education-specific-life-tables-from-eurostat" class="section level2">
+<h2>Deriving education-specific life tables from Eurostat</h2>
+<p>The life table survivors at age <span class="math inline">\(x\)</span> (<span class="math inline">\(l_x\)</span>) can be obtained from life expectancy estimates at age <span class="math inline">\(x\)</span> (<span class="math inline">\(e_x\)</span>) after assuming that in each age interval <span class="math inline">\(x\)</span> to <span class="math inline">\(x+1\)</span>, people dying within this period live on average <span class="math inline">\(1/2\)</span> person-years (<span class="math inline">\(a_x=0.5\)</span>):
+<span class="math display">\[\begin{equation}
+l_{x+1}=\frac{l_x \cdot (2 \cdot e_x -1)}{1+2 \cdot e_{x+1}}.
+\end{equation}\]</span>
+Please note, <span class="math inline">\(l_0\)</span> denotes the life table radix (usually defined as 100 000) and does not require estimation. Thus, the life table reconstruction starts with deriving <span class="math inline">\(l_1\)</span>:
+<span class="math display">\[\begin{equation}
+l_{1}=\frac{l_0 \cdot (2 \cdot e_0 -1)}{1+2 \cdot e_{1}}.
+\end{equation}\]</span>
+In this way, the life table survivors at age 1 can be estimated from three known life table functions, i.e., <span class="math inline">\(l_0\)</span>, <span class="math inline">\(e_0\)</span>, and <span class="math inline">\(e_1\)</span>. In the next step, <span class="math inline">\(l_2\)</span> is estimated from <span class="math inline">\(l_1\)</span>, <span class="math inline">\(e_1\)</span>, and <span class="math inline">\(e_2\)</span> and so forth. Once all <span class="math inline">\(l_x\)</span> are estimated on the basis of this algorithm, the remaining life table functions can be easily derived, such as <span class="math inline">\(L_x\)</span> (<span class="math inline">\(L_x=(l_x+l_{x+1})/2)\)</span>. Theoretically, equation 1 enables us to reconstruct life table functions based on <span class="math inline">\(e_x\)</span> values (under the <span class="math inline">\(a_x\)</span> = 0.5 assumption). In practice, however, the reconstruction might require additional steps. For example, the <span class="math inline">\(e_x\)</span> values provided by Eurostat have only one decimal place. This limits the accuracy of the <span class="math inline">\(l_x\)</span> derivation and might result in constant <span class="math inline">\(l_x\)</span> values for several ages. To overcome this issue, we fitted a non-parametric curve to the data and predicted <span class="math inline">\(e_x\)</span> values with more decimal places. More specifically, we used the loess() function in R in order to obtain <span class="math inline">\(e_x\)</span> values with more decimal places that are as close as possible to the original <span class="math inline">\(e_x\)</span> values. In some cases, e.g., for the highly educated subpopulation in very low-mortality countries, the proposed derivation procedure still produces constant <span class="math inline">\(l_x\)</span> values at young ages. We solved this issue by focusing on <span class="math inline">\(e_{30}\)</span> and HLY at age 30.</p>
+<p>The following code provides an example for calculating education-specific life tables when only the education-specific <span class="math inline">\(e_x\)</span> values are known. In other words, the aim of the code is to calculate the life table backwards, namely from <span class="math inline">\(e_x\)</span> to <span class="math inline">\(p_x\)</span>. This is necessary because Eurostat does not provide education-specific life tables, but education-specific <span class="math inline">\(e_x\)</span> values are available. Please note, the results in this example will differ from the results in the paper due to updates in the Eurostat database.</p>
+<pre class="r"><code>library(dplyr)
+library(eurostat)
+#please load these packages and download the data like this:
+data &lt;- get_eurostat(&quot;demo_mlexpecedu&quot;, time_format = &quot;num&quot;)
+
+#rename and redefine the file 
+data$isced11 &lt;- as.character(data$isced11)
+data$isced11 &lt;- ifelse(data$isced11==&quot;ED0-2&quot;, &quot;lower&quot;, data$isced11)
+data$isced11 &lt;- ifelse(data$isced11==&quot;ED3_4&quot;, &quot;middle&quot;, data$isced11)
+data$isced11 &lt;- ifelse(data$isced11==&quot;ED5-8&quot;, &quot;higher&quot;, data$isced11)
+data$isced11 &lt;- ifelse(data$isced11==&quot;TOTAL&quot;, &quot;total&quot;, data$isced11)
+
+data$age &lt;- as.character(data$age)
+data$age &lt;- ifelse(data$age==&quot;Y_LT1&quot;, &quot;Y0&quot;, data$age)
+data$age &lt;- ifelse(data$age==&quot;Y_GE85&quot;, &quot;Y85&quot;, data$age)
+data$age &lt;- substring(data$age, 2)
+
+data &lt;- data[,-1]
+colnames(data) &lt;- c(&quot;sex&quot;,&quot;age&quot;,&quot;edu&quot;,&quot;country&quot;,&quot;year&quot;,&quot;ex&quot;)
+data$age &lt;- as.numeric(data$age)
+#Filter for the year 2016, as we have done
+data &lt;- filter(data, year==2016)</code></pre>
+<p>The following function has the arguments “country.select”, “edu.select” and “sex.select”. Thus, the funcation allows to derive life tables for each educational level (high, middle, low, and total), for each country with available data (16 European countries), separated for men and women.</p>
+<pre class="r"><code>my.function &lt;- function(country.select, edu.select, sex.select) {
+
+    select.country &lt;- arrange(filter(data, country==country.select ,edu==edu.select &amp;
+                                               sex==sex.select),age)
+
+#smooth to get more decimals by applying the loess function,
+#then predict ex with more decimals
+    grab.LE &lt;- select.country$ex
+    smooth.it &lt;- loess(grab.LE~select.country$age, span=0.2)
+    predict.it &lt;- predict(smooth.it, seq(0,85,1))
+    select.country$ex.decimals &lt;- predict.it
+
+    LT.derive &lt;- data.frame(Age=0:85)
+    LT.derive$lx &lt;- NA
+
+    LT.derive$ex &lt;- select.country$ex.decimals
+    LT.derive$lx[1] &lt;- 100000
+    LT.derive$Tx[1] &lt;- 100000*select.country$ex.decimals[1]
+    
+#this loop refers to equation 1 in the paper
+    for (j in 2:86) {
+
+        upper &lt;- LT.derive$lx[j-1]*(2*LT.derive$ex[j-1]-1)
+        bottom &lt;- 1+2*LT.derive$ex[j]
+        LT.derive$lx[j] &lt;- upper/bottom
+    }
+#Checks if lx is monotonic decreasing, i.e., no resurrection in the life table
+    lx.diff &lt;- diff(LT.derive$lx)
+    lx.diff &lt;- round(lx.diff, 5)
+
+    if (all(diff(lx.diff) &lt; 0)) {
+
+        px &lt;- c(LT.frame$lx[-1]/LT.frame$lx[-86],0)
+
+    }else{
+#sometimes, it is not, so I force it =)
+#please note, this occurs usually at very young ages and won&#39;t affect
+#LE at age 30 or older
+        lx.diff[lx.diff&gt;=0] &lt;- -runif(length(lx.diff[lx.diff&gt;=0]), 1, 5)
+        lx.monotonic &lt;- cumsum(c(100000, lx.diff))
+        px &lt;- c(lx.monotonic[-1]/lx.monotonic[-86],0)
+
+        }
+#from here, the life table is constructed very standardly
+    lx &lt;- round(c(100000, (cumprod(px)*100000)[1:(length(px)-1)]))
+    dx &lt;- round(c(-diff(lx), lx[length(lx)]))
+    LT.derive$lx &lt;- lx
+    LT.derive$dx &lt;- dx
+    LT.derive$px &lt;- px
+    Lx1 &lt;- lx[-1]+0.5[-length(px)]*dx[-length(dx)]
+    Lx.open &lt;- LT.derive$Tx[1]-sum(Lx1)
+    LT.derive$Lx &lt;- round(c(Lx1, Lx.open))
+    LT.derive$Tx &lt;- rev(cumsum(rev(LT.derive$Lx)))
+    LT.derive$ex.derived &lt;- LT.derive$Tx/LT.derive$lx
+    LT.derive$ex.original &lt;- select.country$ex
+    LT.derive$diff &lt;- LT.derive$ex.original-LT.derive$ex.derived
+    LT.derive$Country &lt;- country.select
+    LT.derive$Edu &lt;- edu.select
+    LT.derive$Sex &lt;- sex.select
+
+    return(LT.derive[,c(&quot;Country&quot;,&quot;Edu&quot;,&quot;Sex&quot;,&quot;Age&quot;,&quot;px&quot;,&quot;lx&quot;,&quot;dx&quot;,&quot;Lx&quot;,
+                        &quot;Tx&quot;,&quot;ex.derived&quot;,&quot;ex.original&quot;,&quot;diff&quot;)])
+}</code></pre>
+<p>The following code applies the function to all 16 European countries by educational attainment, stratified by sex.</p>
+<pre class="r"><code>#these are the country codes
+edu.countries &lt;- c(&quot;BG&quot;,&quot;DK&quot;,&quot;EE&quot;,&quot;EL&quot;,&quot;HR&quot;,&quot;IT&quot;,&quot;HU&quot;, #CZ is currently not available
+                   &quot;PL&quot;,&quot;PT&quot;,&quot;RO&quot;,&quot;SI&quot;,&quot;SK&quot;,&quot;FI&quot;,&quot;SE&quot;,&quot;NO&quot;)
+
+
+###Females###
+out.females &lt;- c()
+
+for (country.select in edu.countries) {
+
+    for (edu.select in c(&quot;higher&quot;,&quot;middle&quot;,&quot;lower&quot;)) {
+
+        out.females &lt;- rbind(out.females,my.function(country.select, edu.select, &quot;F&quot;))
+}
+}
+
+
+###Males###
+out.males &lt;- c()
+
+for (country.select in edu.countries) {
+
+    for (edu.select in c(&quot;higher&quot;,&quot;middle&quot;,&quot;lower&quot;)) {
+
+        out.males &lt;- rbind(out.males,my.function(country.select, edu.select, &quot;M&quot;))
+}
+}</code></pre>
+<p>Finally, I plot the difference between the original <span class="math inline">\(e_x\)</span> and the derived <span class="math inline">\(e_x\)</span>.</p>
+<pre class="r"><code>par(mfrow=c(3,3))
+for (edu in c(&quot;higher&quot;,&quot;middle&quot;,&quot;lower&quot;)) {
+    plot(1,1, type=&quot;n&quot;, xlim=c(1,16), ylim=c(-0.2,0.2),
+         main=paste(&quot;Females&quot;,edu,sep=&quot; &quot;), xlab=&quot;Countries&quot;,
+         ylab=&quot;LE 30 original - LE30 derived&quot;)
+    points(1:15,out.females$diff[out.females$Edu==edu &amp; out.females$Age==30])
+    text(1:15,out.females$diff[out.females$Edu==edu &amp; out.females$Age==30], 1:16,
+         label=out.females$Country[out.females$Edu==edu &amp; out.females$Age==30])
+}
+
+for (edu in c(&quot;higher&quot;,&quot;middle&quot;,&quot;lower&quot;)) {
+    plot(1,1, type=&quot;n&quot;, xlim=c(1,16), ylim=c(-0.2,0.2),
+         main=paste(&quot;Males&quot;,edu,sep=&quot; &quot;), xlab=&quot;Countries&quot;,
+         ylab=&quot;LE 30 original - LE30 derived&quot;)
+    points(1:15,out.males$diff[out.males$Edu==edu &amp; out.males$Age==30])
+    text(1:15,out.males$diff[out.males$Edu==edu &amp; out.males$Age==30], 1:16,
+         label=out.males$Country[out.males$Edu==edu &amp; out.males$Age==30])
+}</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-4-1.png" width="960" /></p>
+<div style="page-break-after: always;"></div>
+</div>
+<div id="complete-life-tables-by-age-and-education-stratified-by-women-and-men" class="section level2">
+<h2>Complete life tables by age and education (stratified by women and men)</h2>
+<p>This prints all the age- and education-specific life tables (the output it omitted).</p>
+<pre class="r"><code>library(knitr)
+
+table.fun &lt;- function(country.select) {
+    
+    print(
+        kable(filter(out.females, Country==country.select &amp; Edu==&quot;higher&quot;),
+              digits=4, caption=paste(&quot;Life table for high-educated women in&quot;,
+                                      country.select,&quot;, 2016&quot;,sep=&quot; &quot;)) 
+        )
+    print(
+        kable(filter(out.females, Country==country.select &amp; Edu==&quot;middle&quot;),
+              digits=4, caption=paste(&quot;Life table for middle-educated women in&quot;,
+                                      country.select,&quot;, 2016&quot;,sep=&quot; &quot;)) 
+          )
+    print(
+        kable(filter(out.females, Country==country.select &amp; Edu==&quot;lower&quot;),
+              digits=4, caption=paste(&quot;Life table for low-educated women in&quot;,
+                                      country.select,&quot;, 2016&quot;,sep=&quot; &quot;))
+        )
+
+    print(
+        kable(filter(out.males, Country==country.select &amp; Edu==&quot;higher&quot;),
+              digits=4, caption=paste(&quot;Life table for high-educated men in&quot;,
+                                      country.select,&quot;, 2016&quot;,sep=&quot; &quot;)) 
+            )
+    
+    print(
+        kable(filter(out.males, Country==country.select &amp; Edu==&quot;middle&quot;),
+              digits=4, caption=paste(&quot;Life table for middle-educated men in&quot;,
+                                      country.select,&quot;, 2016&quot;,sep=&quot; &quot;)) 
+            )
+    print(
+        kable(filter(out.males, Country==country.select &amp; Edu==&quot;lower&quot;),
+              digits=4, caption=paste(&quot;Life table for low-educated men in&quot;,
+                                      country.select,&quot;, 2016&quot;,sep=&quot; &quot;)) 
+            )    
+}
+
+for (country in edu.countries) {
+    table.fun(country)  
+}</code></pre>
+</div>
