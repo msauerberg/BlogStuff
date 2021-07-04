@@ -227,4 +227,4 @@ for (country in edu.countries) {
 }
 ```
 ## References
-- Sauerberg, M. (2021). The imapact of population's educational attainment on Healthy Life Years in Europe: An empirical illustration of 16 European countries. SSM - Population Health, 15.
+- Sauerberg, M. (2021). The imapact of population's educational attainment on Healthy Life Years in Europe: An empirical illustration of 16 European countries. SSM - Population Health, 15(100857).
