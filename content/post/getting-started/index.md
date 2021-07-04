@@ -1,20 +1,43 @@
 ---
-title: "Reconstructing all life table functions from $e_x$"
-author: "Markus Sauerberg"
-date: '2021-07-04T21:13:14-05:00'
-categories: R
+title: Reconstruction life table functions from life expectancy
+
+# Summary for listings and search engines
+summary: This R code might help you reconstructing life table functions when only ex is known
+
+# Link this post with a project
+projects: []
+
+# Date published
+date: "2021-07-04T00:00:00Z"
+
+# Date updated
+lastmod: "2021-07-04T00:00:00Z"
+
+# Is this an unpublished draft?
+draft: false
+
+# Show this page in the Featured widget?
+featured: false
+
+# Featured image
+# Place an image named `featured.jpg/png` in this page's folder and customize its options here.
+image:
+  caption: 'Plot'
+  focal_point: ""
+  placement: 2
+  preview_only: false
+
+authors:
+- admin
+
 tags:
-- R Markdown
-- Demoragphy
+- R coding
+
+categories:
+- Demography
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-
-\pagenumbering{gobble}
-## Deriving education-specific life tables from Eurostat
+## Deriving education-specific life tables with an iterative process
 The life table survivors at age $x$ ($l_x$) can be obtained from life expectancy estimates at age $x$ ($e_x$) after assuming that in each age interval $x$ to $x+1$, people dying within this period live on average $1/2$ person-years ($a_x=0.5$):
 \begin{equation}
 l_{x+1}=\frac{l_x \cdot (2 \cdot e_x -1)}{1+2 \cdot e_{x+1}}.
@@ -26,8 +49,8 @@ l_{1}=\frac{l_0 \cdot (2 \cdot e_0 -1)}{1+2 \cdot e_{1}}.
 In this way, the life table survivors at age 1 can be estimated from three known life table functions, i.e.,  $l_0$, $e_0$, and $e_1$. In the next step, $l_2$ is estimated from $l_1$, $e_1$, and $e_2$ and so forth. Once all $l_x$ are estimated on the basis of this algorithm, the remaining life table functions can be easily derived, such as $L_x$ ($L_x=(l_x+l_{x+1})/2)$. Theoretically, equation 1 enables us to reconstruct life table functions based on $e_x$ values (under the $a_x$ = 0.5 assumption). In practice, however, the reconstruction might require additional steps. For example, the $e_x$ values provided by Eurostat have only one decimal place. This limits the accuracy of the $l_x$ derivation and might result in constant $l_x$ values for several ages. To overcome this issue, we fitted a non-parametric curve to the data and predicted $e_x$ values with more decimal places. More specifically, we used the loess() function in R in order to obtain $e_x$ values with more decimal places that are as close as possible to the original $e_x$ values. In some cases, e.g., for the highly educated subpopulation in very low-mortality countries, the proposed derivation procedure still produces constant $l_x$ values at young ages. We solved this issue by focusing on $e_{30}$ and HLY at age 30.
 
 
-The following code provides an example for calculating education-specific life tables when only the education-specific $e_x$ values are known. In other words, the aim of the code is to calculate the life table backwards, namely from $e_x$ to $p_x$. This is necessary because Eurostat does not provide education-specific life tables, but education-specific $e_x$ values are available. Please note, the results in this example will differ from the results in the paper due to updates in the Eurostat database.
-```{r, message=FALSE, warning=FALSE}
+The following code provides an example for calculating education-specific life tables when only the education-specific $e_x$ values are known. In other words, the aim of the code is to calculate the life table backwards, namely from $e_x$ to $p_x$. This is necessary because Eurostat does not provide education-specific life tables, but education-specific $e_x$ values are available. Please note, the results in this example will differ from the results in my paper (Sauerberg 2021) due to updates in the Eurostat database.
+```r
 library(dplyr)
 library(eurostat)
 #please load these packages and download the data like this:
@@ -52,7 +75,8 @@ data$age <- as.numeric(data$age)
 data <- filter(data, year==2016)
 ```
 The following function has the arguments "country.select", "edu.select" and "sex.select". Thus, the funcation allows to derive life tables for each educational level (high, middle, low, and total), for each country with available data (16 European countries), separated for men and women.
-```{r, message=FALSE, warning=FALSE}
+
+```r
 my.function <- function(country.select, edu.select, sex.select) {
 
     select.country <- arrange(filter(data, country==country.select ,edu==edu.select &
@@ -64,7 +88,6 @@ my.function <- function(country.select, edu.select, sex.select) {
     smooth.it <- loess(grab.LE~select.country$age, span=0.2)
     predict.it <- predict(smooth.it, seq(0,85,1))
     select.country$ex.decimals <- predict.it
-
 
     LT.derive <- data.frame(Age=0:85)
     LT.derive$lx <- NA
@@ -119,8 +142,7 @@ my.function <- function(country.select, edu.select, sex.select) {
 }
 ```
 The following code applies the function to all 16 European countries by educational attainment, stratified by sex.
-
-```{r, message=FALSE, warning=FALSE}
+```r
 #these are the country codes
 edu.countries <- c("BG","DK","EE","EL","HR","IT","HU", #CZ is currently not available
                    "PL","PT","RO","SI","SK","FI","SE","NO")
@@ -148,10 +170,9 @@ for (country.select in edu.countries) {
         out.males <- rbind(out.males,my.function(country.select, edu.select, "M"))
 }
 }
-
 ```
 Finally, I plot the difference between the original $e_x$ and the derived $e_x$.
-```{r, message=FALSE, warning=FALSE, fig.width=10,fig.height=12}
+```r
 par(mfrow=c(3,3))
 for (edu in c("higher","middle","lower")) {
     plot(1,1, type="n", xlim=c(1,16), ylim=c(-0.2,0.2),
@@ -170,15 +191,13 @@ for (edu in c("higher","middle","lower")) {
     text(1:15,out.males$diff[out.males$Edu==edu & out.males$Age==30], 1:16,
          label=out.males$Country[out.males$Edu==edu & out.males$Age==30])
 }
-
 ```
 
-\newpage
 
 ## Complete life tables by age and education (stratified by women and men)
 This prints all the age- and education-specific life tables (the output it omitted).
 
-```{r, message = FALSE, results='asis', warning=FALSE, eval=FALSE}
+```r
 library(knitr)
 
 table.fun <- function(country.select) {
@@ -221,3 +240,5 @@ for (country in edu.countries) {
     table.fun(country)  
 }
 ```
+## References
+- Sauerberg, M. (2021). The imapact of population's educational attainment on Healthy Life Years in Europe: An empirical illustration of 16 European countries. SSM - Population Health, 15(100857).
