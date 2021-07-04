@@ -18,9 +18,7 @@ image:
   preview_only: no
 projects: []
 ---
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(collapse = TRUE)
-```
+
 ## Deriving education-specific life tables with an iterative process
 The life table survivors at age $x$ ($l_x$) can be obtained from life expectancy estimates at age $x$ ($e_x$) after assuming that in each age interval $x$ to $x+1$, people dying within this period live on average $1/2$ person-years ($a_x=0.5$):
 \begin{equation}
@@ -34,7 +32,8 @@ In this way, the life table survivors at age 1 can be estimated from three known
 
 
 The following code provides an example for calculating education-specific life tables when only the education-specific $e_x$ values are known. In other words, the aim of the code is to calculate the life table backwards, namely from $e_x$ to $p_x$. This is necessary because Eurostat does not provide education-specific life tables, but education-specific $e_x$ values are available. Please note, the results in this example will differ from the results in my paper (Sauerberg 2021) due to updates in the Eurostat database.
-```{r, message=FALSE, warning=FALSE}
+
+```r
 library(dplyr)
 library(eurostat)
 #please load these packages and download the data like this:
@@ -59,7 +58,8 @@ data$age <- as.numeric(data$age)
 data <- filter(data, year==2016)
 ```
 The following function has the arguments "country.select", "edu.select" and "sex.select". Thus, the funcation allows to derive life tables for each educational level (high, middle, low, and total), for each country with available data (16 European countries), separated for men and women.
-```{r, message=FALSE, warning=FALSE}
+
+```r
 my.function <- function(country.select, edu.select, sex.select) {
 
     select.country <- arrange(filter(data, country==country.select ,edu==edu.select &
@@ -71,7 +71,6 @@ my.function <- function(country.select, edu.select, sex.select) {
     smooth.it <- loess(grab.LE~select.country$age, span=0.2)
     predict.it <- predict(smooth.it, seq(0,85,1))
     select.country$ex.decimals <- predict.it
-
 
     LT.derive <- data.frame(Age=0:85)
     LT.derive$lx <- NA
@@ -127,7 +126,8 @@ my.function <- function(country.select, edu.select, sex.select) {
 ```
 The following code applies the function to all 16 European countries by educational attainment, stratified by sex.
 
-```{r, message=FALSE, warning=FALSE}
+
+```r
 #these are the country codes
 edu.countries <- c("BG","DK","EE","EL","HR","IT","HU", #CZ is currently not available
                    "PL","PT","RO","SI","SK","FI","SE","NO")
@@ -155,10 +155,10 @@ for (country.select in edu.countries) {
         out.males <- rbind(out.males,my.function(country.select, edu.select, "M"))
 }
 }
-
 ```
 Finally, I plot the difference between the original $e_x$ and the derived $e_x$.
-```{r, message=FALSE, warning=FALSE, fig.width=10,fig.height=12}
+
+```r
 par(mfrow=c(3,3))
 for (edu in c("higher","middle","lower")) {
     plot(1,1, type="n", xlim=c(1,16), ylim=c(-0.2,0.2),
@@ -177,15 +177,17 @@ for (edu in c("higher","middle","lower")) {
     text(1:15,out.males$diff[out.males$Edu==edu & out.males$Age==30], 1:16,
          label=out.males$Country[out.males$Edu==edu & out.males$Age==30])
 }
-
 ```
+
+![plot of chunk unnamed-chunk-4](figure/unnamed-chunk-4-1.png)
 
 \newpage
 
 ## Complete life tables by age and education (stratified by women and men)
 This prints all the age- and education-specific life tables (the output it omitted).
 
-```{r, message = FALSE, results='asis', warning=FALSE, eval=FALSE}
+
+```r
 library(knitr)
 
 table.fun <- function(country.select) {
