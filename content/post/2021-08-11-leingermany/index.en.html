@@ -1,0 +1,182 @@
+---
+title: "Period life expectancy in Germany"
+author: ''
+date: '2021-08-11'
+slug: leingermany
+categories: []
+tags: []
+subtitle: ''
+summary: ''
+authors: []
+lastmod: '2021-08-11T09:22:45+02:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+---
+
+
+
+<div id="death-counts-in-germany-between-2019-and-2020" class="section level1">
+<h1>Death counts in Germany between 2019 and 2020</h1>
+<p>In the light of the COVID-19 pandemic, researchers and journalists were highly interested in comparing the observed number of deaths in 2020 with annual death counts from previous years. In the following, I used the death counts for women and men in Germany provided by <a href="www.destatis.de">Desatis</a>.</p>
+<pre class="r"><code>library(openxlsx)
+setwd(&quot;d:/Rcode/Data&quot;)
+
+###Data is available at www.destatis.de
+Deaths.m &lt;- read.xlsx(&quot;Sterbefälle.xlsx&quot;, sheet=&quot;Men&quot;)
+Deaths.f &lt;- read.xlsx(&quot;Sterbefälle.xlsx&quot;, sheet=&quot;Women&quot;)
+
+Dx.2019.m &lt;- Deaths.m$Deaths2019
+Dx.2020.m &lt;- Deaths.m$Deaths2020
+
+Dx.2019.f &lt;- Deaths.f$Deaths2019
+Dx.2020.f &lt;- Deaths.f$Deaths2020
+
+rbind(
+    cbind(X2019=sum(Dx.2019.m),
+      X2020=sum(Dx.2020.m),
+      Diff=sum(Dx.2019.m)-sum(Dx.2020.m)
+      ),
+
+    cbind(X2019=sum(Dx.2019.f),
+      X2020=sum(Dx.2020.f),
+      Diff=sum(Dx.2019.f)-sum(Dx.2020.f)
+      )
+)</code></pre>
+<pre><code>##       X2019  X2020   Diff
+## [1,] 465885 492797 -26912
+## [2,] 473635 492775 -19140</code></pre>
+<p>The output shown above gives the total death count for men (first row) and women (second row) in 2019 and 2020. The difference between the two years is presented in the last column of the table. We observe more deaths in 2020 compared to 2019 for both genders. We know from previous analyses that excess deaths were not equally distributed over time and across regions. For example, the number of deaths was particularly high at the end of 2020. Analyzing these differences is, however, beyond the scope of this post. Instead, I focus on the average and calculate the mean age at death (MAD), the mode (the age with the highest observed death count), and the median (the age at which 50 percent of the total number of deaths have occurred). Please let me know if you know a better way to derive mode and median (maybe with decimals) without getting too sophisticated (e.g., modeling and predicting counts).</p>
+<pre class="r"><code>age &lt;- 0:100
+MAD.2019.m &lt;- (sum((age+0.5)*Dx.2019.m))/sum(Dx.2019.m)
+MAD.2020.m &lt;- (sum((age+0.5)*Dx.2020.m))/sum(Dx.2020.m)
+Mode.2019.m &lt;- age[which.max(Dx.2019.m)]
+Mode.2020.m &lt;- age[which.max(Dx.2020.m)]
+Median.2019.m &lt;- age[which(cumsum(Dx.2019.m)&gt;=(sum(Dx.2019.m)/2))[1]]
+Median.2020.m &lt;- age[which(cumsum(Dx.2020.m)&gt;=(sum(Dx.2020.m)/2))[1]]
+
+MAD.2019.f &lt;- (sum((age+0.5)*Dx.2019.f))/sum(Dx.2019.f)
+MAD.2020.f &lt;- (sum((age+0.5)*Dx.2020.f))/sum(Dx.2020.f)
+Mode.2019.f &lt;- age[which.max(Dx.2019.f)]
+Mode.2020.f &lt;- age[which.max(Dx.2020.f)]
+Median.2019.f &lt;- age[which(cumsum(Dx.2019.f)&gt;=(sum(Dx.2019.f)/2))[1]]
+Median.2020.f &lt;- age[which(cumsum(Dx.2020.f)&gt;=(sum(Dx.2020.f)/2))[1]]
+
+rbind(
+    cbind(MAD.2019=MAD.2019.m,
+      MAD.2020=MAD.2020.m,
+      Diff=MAD.2019.m-MAD.2020.m
+      ),
+
+    cbind(MAD.2019=MAD.2019.f,
+      MAD.2020=MAD.2020.f,
+      Diff=MAD.2019.f-MAD.2020.f
+      )
+)</code></pre>
+<pre><code>##      MAD.2019 MAD.2020       Diff
+## [1,] 76.05939 76.47146 -0.4120715
+## [2,] 81.92622 82.18910 -0.2628851</code></pre>
+<p>The MAD increased for both, women and men between 2019 and 2020. Accordingly, the analysis suggest that more people have died in 2020 but most deaths have occurred at relatively old ages. It is correct that this kind of analysis does not take into account changes in the age structure. Germany is an aging population and more persons at older ages will necessarily lead to an increase in the observed death count. The following graph shows the observed distribution of death. The vertical lines indicate the MAD, the modal age at death, and the median.
+<img src="{{< blogdown/postref >}}index.en_files/figure-html/Fig1-1.png" width="960" />
+Especially at higher ages (between 80 and 90), more deaths have been observed in 2020 compared to the previous year. More information about the relationship between longevity and trends in the mean age at death, modal age at death, and median age at death can be found in Canudas-Romo (2010).</p>
+</div>
+<div id="standardized-mean-age-at-death" class="section level1">
+<h1>Standardized Mean Age at Death</h1>
+<p>In the next step, I will calculate another MAD which is less common but, I believe, very interesting. It is the standardized MAD which has been described by Bongaarts and Feeney (2003). The standardized MAD is the mean age at death that would have been observed if the present population had experienced a constant inflow of births. In other words, the initial size of each birth cohort is constant or how Guillot (2006) put it “MAD can be interpreted as the population mean age at death at time t, controlling for changes in the initial size of cohorts.” I used the cohort life tables provided by Destatis in order to calculate the standardized number of deaths in 2019 and 2020. This allows obtaining standardized MAD, mode, and median values.</p>
+<pre class="r"><code>###Standardized death count calculated on the basis of cohort life tables provided at www.destatis.de
+library(openxlsx)
+setwd(&quot;d:/Rcode/Data&quot;)
+
+Dx.standardized &lt;- read.table(&quot;MAD_dx.txt&quot;)
+
+Std.Dx.2019.m &lt;- Dx.standardized$dx.2019[Dx.standardized$Sex==&quot;M&quot;]*100000
+Std.Dx.2020.m &lt;- Dx.standardized$dx.2020[Dx.standardized$Sex==&quot;M&quot;]*100000
+
+Std.Dx.2019.f &lt;- Dx.standardized$dx.2019[Dx.standardized$Sex==&quot;F&quot;]*100000
+Std.Dx.2020.f &lt;- Dx.standardized$dx.2020[Dx.standardized$Sex==&quot;F&quot;]*100000
+
+
+age &lt;- 0:100
+Std.MAD.2019.m &lt;- (sum((age+0.5)*Std.Dx.2019.m))/sum(Std.Dx.2019.m)
+Std.MAD.2020.m &lt;- (sum((age+0.5)*Std.Dx.2020.m))/sum(Std.Dx.2020.m)
+Std.Mode.2019.m &lt;- age[which.max(Std.Dx.2019.m)]
+Std.Mode.2020.m &lt;- age[which.max(Std.Dx.2020.m)]
+Std.Median.2019.m &lt;- age[which(cumsum(Std.Dx.2019.m)&gt;=(sum(Std.Dx.2019.m)/2))[1]]
+Std.Median.2020.m &lt;- age[which(cumsum(Std.Dx.2020.m)&gt;=(sum(Std.Dx.2020.m)/2))[1]]
+
+Std.MAD.2019.f &lt;- (sum((age+0.5)*Std.Dx.2019.f))/sum(Std.Dx.2019.f)
+Std.MAD.2020.f &lt;- (sum((age+0.5)*Std.Dx.2020.f))/sum(Std.Dx.2020.f)
+Std.Mode.2019.f &lt;- age[which.max(Std.Dx.2019.f)]
+Std.Mode.2020.f &lt;- age[which.max(Std.Dx.2020.f)]
+Std.Median.2019.f &lt;- age[which(cumsum(Std.Dx.2019.f)&gt;=(sum(Std.Dx.2019.f)/2))[1]]
+Std.Median.2020.f &lt;- age[which(cumsum(Std.Dx.2020.f)&gt;=(sum(Std.Dx.2020.f)/2))[1]]
+
+rbind(
+    cbind(MAD.2019=Std.MAD.2019.m,
+      MAD.2020=Std.MAD.2020.m,
+      Diff=Std.MAD.2019.m-Std.MAD.2020.m
+      ),
+
+    cbind(MAD.2019=Std.MAD.2019.f,
+      MAD.2020=Std.MAD.2020.f,
+      Diff=Std.MAD.2019.f-Std.MAD.2020.f
+      )
+)</code></pre>
+<pre><code>##      MAD.2019 MAD.2020       Diff
+## [1,] 76.37203 76.56336 -0.1913279
+## [2,] 81.83031 81.96213 -0.1318239</code></pre>
+<p>By definition, this measure is not affected by changes in the age structure. Also the standardized MAD increased between 2019 and 2020. The standardized distribution is smoother as compared to the unstandardized one, indicating that some of the bumps can be ascribed to differences in the size of birth cohorts.</p>
+<p><img src="{{< blogdown/postref >}}index.en_files/figure-html/Fig2-1.png" width="960" /></p>
+</div>
+<div id="period-life-expectancy-in-2019-and-2020" class="section level1">
+<h1>Period life expectancy in 2019 and 2020</h1>
+<p>Last but not least, I provide estimates for the most prominent mortality indicator, i.e., period life expectancy at birth (LE). As a reminder, LE is the mean age at death for the period life table population. The life table population is derived from age-specific death rates which are again provided by Destatis. This is the exact link: <a href="https://www.destatis.de/DE/Presse/Pressemitteilungen/2021/07/PD21_331_12621.html" class="uri">https://www.destatis.de/DE/Presse/Pressemitteilungen/2021/07/PD21_331_12621.html</a>. I simply copied the values from the table to my R session, e.g., “Germany.mx.2019.women &lt;- c(…)” (code is omitted). Please note, the death rates refer to 5-years age intervals. For this reason, I calculated an abridged life table. The R package <a href="https://cran.r-project.org/web/packages/MortalityLaws/MortalityLaws.pdf">MortalityLaws</a>" by Marius Pascariu helped me. Thanks! Another great option for this exercise is the <a href="https://timriffe.github.io/DemoTools/">DemoTools</a> package by Time Riffe et al. but unfortunately my computer refuses to install it :/</p>
+<pre class="r"><code>###Following the MortalityLaws documentation example, the abridged life table is constructed as:
+library(MortalityLaws)
+
+x &lt;- c(0, 1, seq(5, 95, by = 5))
+
+LE.women.2019 &lt;- LifeTable(x, mx = Germany.mx.2019.women/1000, sex = &quot;female&quot;)
+LE.women.2020 &lt;- LifeTable(x, mx = Germany.mx.2020.women/1000, sex = &quot;female&quot;)
+
+LE.men.2019 &lt;- LifeTable(x, mx = Germany.mx.2019.men/1000, sex = &quot;male&quot;)
+LE.men.2020 &lt;- LifeTable(x, mx = Germany.mx.2020.men/1000, sex = &quot;male&quot;)
+
+###Compare LE estimates by age
+###Men in Germany
+round(cbind(Age=x[c(1,15)],
+      LE.2019=LE.men.2019$lt$ex[c(1,15)],
+      LE.2020=LE.men.2020$lt$ex[c(1,15)],
+      Diff=LE.men.2019$lt$ex[c(1,15)]-LE.men.2020$lt$ex[c(1,15)]),2)</code></pre>
+<pre><code>##      Age LE.2019 LE.2020 Diff
+## [1,]   0   78.69   78.53 0.16
+## [2,]  65   17.98   17.76 0.21</code></pre>
+<pre class="r"><code>###Women in Germany
+round(cbind(Age=x[c(1,15)],
+      LE.2019=LE.women.2019$lt$ex[c(1,15)],
+      LE.2020=LE.women.2020$lt$ex[c(1,15)],
+      Diff=LE.women.2019$lt$ex[c(1,15)]-LE.women.2020$lt$ex[c(1,15)]),2)</code></pre>
+<pre><code>##      Age LE.2019 LE.2020 Diff
+## [1,]   0   83.34   83.26 0.08
+## [2,]  65   21.04   20.94 0.10</code></pre>
+<p>As presented in the table above, LE slightly decreased for both genders. The decrease was larger for men than for women. The distribution of life table deaths is plotted below. It shows the age-specific number of deaths for the life table cohort which has been exposed to the age-specific mortality rates observed in Germany.
+<img src="{{< blogdown/postref >}}index.en_files/figure-html/Fig3-1.png" width="960" />
+This time I did not calculate mode and median in addition to the mean age at death because, as already mentioned, data was only available in 5-years age intervals. The MAD (or LE) in the period life table population is higher compared to the the unstandardized and standardized MAD. Another way to look at LE is imagining Germany would be trapped in a loop where it repeats the year 2020 over and over again for about 100 years (I know, nobody wants this). A lucky child who is born at the beginning of this loop can expect to live 83.26 years in case it´s a girl and 78.53 years if it´s a boy. Obviously, this scenario is unlikely and LE is usually not a good estimate for the expected life time of any actual group of individuals (Goldstein and Wachter 2006). It is rather a convenient way to summarize period death rates and examine period shocks in health and mortality. The increase in the observed death rates for the elderly in 2020 is reflected by the decrease in period LE in 2020. Yet, the indicator is not free of limitations and can lead to misleading conclusions regarding levels and trends in population health (Luy et al. 2020; Modig, Rau, and Ahlbom 2020; Heuveline 2021). In comparison to other countries, Germany`s LE reduction is small. It is important to note that changes in death rates at different ages will affect LE differently (Vaupel 1986). It is therefore not so easy to translate increases in death counts at any age directly into LE reductions. For more information about LE reductions in 2020 see the work by Aburto et al. (2001), which features a great cross-country comparison and a even an interactive <a href="https://covid19.demographicscience.ox.ac.uk/lifeexpectancy">dashboard</a>.</p>
+</div>
+<div id="references" class="section level1">
+<h1>References</h1>
+<ul>
+<li><p>Canudas-Romo, V. (2010). Three Measures of Longevity: Time Trends and Record Values. <strong>Demography</strong> 47(2):299–312.</p></li>
+<li><p>Bongaarts, J. and Feeney, G. (2003). Estimating mean lifetime. <strong>PNAS</strong> 100(23):13127-13133.</p></li>
+<li><p>Guillot, M. (2006). Tempo effects in mortality: An appraisal. <strong>Demographic Research</strong> 41(1):1-26.</p></li>
+<li><p>Goldstein, J., &amp; Wachter, K. (2006). Relationships between Period and Cohort Life Expectancy: Gaps and Lags. <strong>Population Studies</strong> 60(3):257-269.</p></li>
+<li><p>Luy, M., Di Giulio, P., Di Lego, V., Lazarevič, P., Sauerberg, M. (2020). Life Expectancy: Frequently Used, but Hardly Understood. <strong>Gerontology</strong> 66:95-104.</p></li>
+<li><p>Modig, K., Rau, R., Ahlbom, A. (2020). Life expectancy: what does it measure? <strong>BMJ Open</strong> 10(7):e035932.</p></li>
+<li><p>Heuveline, P. (2021). The Mean Unfulfilled Lifespan (MUL): A new indicator of the impact of mortality shocks on the individual lifespan, with application to mortality reversals induced by COVID-19. <strong>PLoS ONE</strong> 16(7):e0254925.</p></li>
+<li><p>Vaupel, J. (1986). How changes in age-specific mortality affects life expectancy. <strong>Population Studies</strong> 40:147-157.</p></li>
+<li><p>Aburto, J.M., Schöley, J., Zhang, L., Kashmitsky, I., Rahal, C., Missov, T.I., Mills, M.C., Dowd, J.B., Kashyap, R. (2021). Recent Gains in Life Expectancy Reversed by the COVID-19 Pandemic. <strong>Medrxiv</strong> <a href="https://www.medrxiv.org/content/10.1101/2021.03.02.21252772v1">Link</a>.</p></li>
+</ul>
+</div>
