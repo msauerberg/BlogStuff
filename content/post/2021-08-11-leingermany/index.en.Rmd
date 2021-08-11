@@ -18,7 +18,7 @@ projects: []
 ---
 
 # Death counts in Germany between 2019 and 2020
-In the light of the COVID-19 pandemic, researchers and journalists were highly interested in comparing the observed number of deaths in 2020 with annual death  counts from previous years. In the following, I used the death counts for women and men in Germany provided by [Desatis](www.destatis.de). 
+In the light of the COVID-19 pandemic, researchers and journalists were highly interested in comparing the observed number of deaths in 2020 with annual death  counts from previous years. In the following, I used the death counts for women and men in Germany provided by [Desatis](https://www.destatis.de/DE/Home/_inhalt.html). 
 
 ```{r, warning=FALSE}
 library(openxlsx)
