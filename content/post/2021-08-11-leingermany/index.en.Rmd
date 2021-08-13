@@ -348,4 +348,4 @@ This time I do not calculate the median because, as already mentioned, data was 
 
 - Vaupel, J. (1986). How changes in age-specific mortality affects life expectancy. **Population Studies** 40:147-157.
 
-- Aburto, J.M., Schöley, J., Zhang, L., Kashmitsky, I., Rahal, C., Missov, T.I., Mills, M.C., Dowd, J.B., Kashyap, R. (2021). Recent Gains in Life Expectancy Reversed by the COVID-19 Pandemic. **Medrxiv** [Link](https://www.medrxiv.org/content/10.1101/2021.03.02.21252772v1).
+- Aburto, J.M., Schöley, J., Zhang, L., Kashnitsky, I., Rahal, C., Missov, T.I., Mills, M.C., Dowd, J.B., Kashyap, R. (2021). Recent Gains in Life Expectancy Reversed by the COVID-19 Pandemic. **Medrxiv** [Link](https://www.medrxiv.org/content/10.1101/2021.03.02.21252772v1).
