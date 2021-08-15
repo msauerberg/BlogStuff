@@ -133,40 +133,47 @@ rbind(
 </div>
 <div id="period-life-expectancy-in-2019-and-2020" class="section level1">
 <h1>Period life expectancy in 2019 and 2020</h1>
-<p>Last but not least, I provide estimates for the most prominent mortality indicator, i.e., period life expectancy at birth (LE). As a reminder, LE is the mean age at death for the period life table population. The life table population is derived from age-specific death rates which are again provided by Destatis. This is the exact link: <a href="https://www.destatis.de/DE/Presse/Pressemitteilungen/2021/07/PD21_331_12621.html" class="uri">https://www.destatis.de/DE/Presse/Pressemitteilungen/2021/07/PD21_331_12621.html</a>. I simply copied the values from the table to my R session, e.g., “Germany.mx.2019.women &lt;- c(…)” (code is omitted). Please note, the death rates refer to 5-years age intervals. For this reason, I calculated an abridged life table. The R package <a href="https://cran.r-project.org/web/packages/MortalityLaws/MortalityLaws.pdf">MortalityLaws</a>" by Marius Pascariu helped me. Thanks!</p>
-<pre class="r"><code>###Following the MortalityLaws documentation example, the abridged life table is constructed as:
-library(MortalityLaws)
+<p>Last but not least, I provide estimates for the most prominent mortality indicator, i.e., period life expectancy at birth (LE). As a reminder, LE is the mean age at death for the period life table population. The life table population is derived from age-specific death rates which are again provided by Destatis. This is the exact link: <a href="https://www.destatis.de/DE/Presse/Pressemitteilungen/2021/07/PD21_331_12621.html" class="uri">https://www.destatis.de/DE/Presse/Pressemitteilungen/2021/07/PD21_331_12621.html</a>. I simply copied the values from the table to my R session, e.g., “Germany.mx.2019.women &lt;- c(…)” (code is omitted). Please note, the death rates refer to 5-years age intervals. For this reason, I calculated an abridged life table. The R package <a href="https://timriffe.github.io/DemoTools/">DemotTools</a>" by Tim Riffe et al. (2019) helped me. Thanks!</p>
+<pre class="r"><code>###Following the DemoTools documentation example, the abridged life table is constructed as:
+library(DemoTools)</code></pre>
+<pre><code>## Lade nötiges Paket: Rcpp</code></pre>
+<pre class="r"><code>Age &lt;- c(0, 1, seq(5, 95, by = 5))
+AgeInt &lt;- age2int(Age,OAvalue = 5)
 
-x &lt;- c(0, 1, seq(5, 95, by = 5))
+LE.women.2019 &lt;- lt_abridged(Age=Age, nMx = Germany.mx.2019.women/1000, sex = &quot;female&quot;,
+                             AgeInt = AgeInt, axmethod = &quot;un&quot;, mod = FALSE, OAnew = 100, a0rule =&quot;cd&quot;)
 
-LE.women.2019 &lt;- LifeTable(x, mx = Germany.mx.2019.women/1000, sex = &quot;female&quot;)
-LE.women.2020 &lt;- LifeTable(x, mx = Germany.mx.2020.women/1000, sex = &quot;female&quot;)
+LE.women.2020 &lt;- lt_abridged(Age=Age, nMx = Germany.mx.2020.women/1000, sex = &quot;female&quot;,
+                             AgeInt = AgeInt, axmethod = &quot;un&quot;, mod = FALSE, OAnew = 100, a0rule =&quot;cd&quot;)
 
-LE.men.2019 &lt;- LifeTable(x, mx = Germany.mx.2019.men/1000, sex = &quot;male&quot;)
-LE.men.2020 &lt;- LifeTable(x, mx = Germany.mx.2020.men/1000, sex = &quot;male&quot;)
+LE.men.2019 &lt;- lt_abridged(Age=Age, nMx = Germany.mx.2019.men/1000, sex = &quot;male&quot;,
+                           AgeInt = AgeInt, axmethod = &quot;un&quot;, mod = FALSE, OAnew = 100, a0rule =&quot;cd&quot;)
+
+LE.men.2020 &lt;- lt_abridged(Age=Age, nMx = Germany.mx.2020.men/1000, sex = &quot;male&quot;,
+                           AgeInt = AgeInt, axmethod = &quot;un&quot;, mod = FALSE, OAnew = 100, a0rule =&quot;cd&quot;)
 
 ###Compare LE estimates by age
 ###Men in Germany
-round(cbind(Age=x[c(1,15)],
-      LE.2019=LE.men.2019$lt$ex[c(1,15)],
-      LE.2020=LE.men.2020$lt$ex[c(1,15)],
-      Diff=LE.men.2019$lt$ex[c(1,15)]-LE.men.2020$lt$ex[c(1,15)]),2)</code></pre>
+round(cbind(Age=Age[c(1,15)],
+      LE.2019=LE.men.2019$ex[c(1,15)],
+      LE.2020=LE.men.2020$ex[c(1,15)],
+      Diff=LE.men.2019$ex[c(1,15)]-LE.men.2020$ex[c(1,15)]),2)</code></pre>
 <pre><code>##      Age LE.2019 LE.2020 Diff
-## [1,]   0   78.69   78.53 0.16
-## [2,]  65   17.98   17.76 0.21</code></pre>
+## [1,]   0   78.86   78.69 0.17
+## [2,]  65   18.15   17.92 0.23</code></pre>
 <pre class="r"><code>###Women in Germany
-round(cbind(Age=x[c(1,15)],
-      LE.2019=LE.women.2019$lt$ex[c(1,15)],
-      LE.2020=LE.women.2020$lt$ex[c(1,15)],
-      Diff=LE.women.2019$lt$ex[c(1,15)]-LE.women.2020$lt$ex[c(1,15)]),2)</code></pre>
+round(cbind(Age=Age[c(1,15)],
+      LE.2019=LE.women.2019$ex[c(1,15)],
+      LE.2020=LE.women.2020$ex[c(1,15)],
+      Diff=LE.women.2019$ex[c(1,15)]-LE.women.2020$ex[c(1,15)]),2)</code></pre>
 <pre><code>##      Age LE.2019 LE.2020 Diff
-## [1,]   0   83.34   83.26 0.08
-## [2,]  65   21.04   20.94 0.10</code></pre>
+## [1,]   0   83.64   83.55 0.10
+## [2,]  65   21.35   21.23 0.12</code></pre>
 <pre class="r"><code>###getting mode
-Mode.LT.2019.f &lt;- x[which.max(LE.women.2019$lt$dx)]
-Mode.LT.2020.f &lt;- x[which.max(LE.women.2020$lt$dx)]
-Mode.LT.2019.m &lt;- x[which.max(LE.men.2019$lt$dx)]
-Mode.LT.2020.m &lt;- x[which.max(LE.men.2020$lt$dx)]</code></pre>
+Mode.LT.2019.f &lt;- Age[which.max(LE.women.2019$ndx)]
+Mode.LT.2020.f &lt;- Age[which.max(LE.women.2020$ndx)]
+Mode.LT.2019.m &lt;- Age[which.max(LE.men.2019$ndx)]
+Mode.LT.2020.m &lt;- Age[which.max(LE.men.2020$ndx)]</code></pre>
 <p>As presented in the table above, LE slightly decreased for both genders. The decrease was larger for men than for women. The distribution of life table deaths is plotted below. It shows the age-specific number of deaths for the life table cohort which has been exposed to the age-specific mortality rates observed in Germany.
 <img src="{{< blogdown/postref >}}index.en_files/figure-html/Fig3-1.png" width="960" />
 This time I do not calculate the median because, as already mentioned, data was only available in 5-years age intervals. The median should lay somewhere in the age interval 80-84 for men and 85-89 for women. The MAD (or LE) in the period life table population is higher compared to the the unstandardized and standardized MAD. Another way to look at LE is imagining Germany would be trapped in a loop where it repeats the year 2020 over and over again for about 100 years (I know, nobody wants this). A lucky child who is born at the beginning of this loop can expect to live 83.26 years in case it´s a girl and 78.53 years if it´s a boy. Obviously, this scenario is unlikely and LE is usually not a good estimate for the expected life time of any actual group of individuals (Goldstein and Wachter 2006). It is rather a convenient way to summarize period death rates and examine period shocks in health and mortality. The increase in the observed death rates for the elderly in 2020 is reflected by the decrease in period LE in 2020. Yet, the indicator is not free of limitations and can lead to misleading conclusions regarding levels and trends in population health (Luy et al. 2020; Modig, Rau, and Ahlbom 2020; Heuveline 2021). In comparison to other countries, Germany`s LE reduction is small. It is important to note that changes in death rates at different ages will affect LE differently (Vaupel 1986). It is therefore not so easy to translate increases in death counts at any age directly into LE reductions. For more information about LE reductions in 2020 see the work by Aburto et al. (2021), which features a great cross-country comparison and a even an interactive <a href="https://covid19.demographicscience.ox.ac.uk/lifeexpectancy">dashboard</a>.</p>
@@ -177,6 +184,7 @@ This time I do not calculate the median because, as already mentioned, data was 
 <li><p>Canudas-Romo, V. (2010). Three Measures of Longevity: Time Trends and Record Values. <strong>Demography</strong> 47(2):299–312.</p></li>
 <li><p>Bongaarts, J. and Feeney, G. (2003). Estimating mean lifetime. <strong>PNAS</strong> 100(23):13127-13133.</p></li>
 <li><p>Guillot, M. (2006). Tempo effects in mortality: An appraisal. <strong>Demographic Research</strong> 41(1):1-26.</p></li>
+<li><p>Riffe, T., Aburto, J.M., Alexander, M., Fennell, S., Kashnitsky, I., Pascariu, M., Gerland, P. (2019). DemoTools: An R package of tools for aggregate demographic analysis. <a href="https://github.com/timriffe/DemoTools/">github.com/timriffe/DemoTools</a>.</p></li>
 <li><p>Goldstein, J., &amp; Wachter, K. (2006). Relationships between Period and Cohort Life Expectancy: Gaps and Lags. <strong>Population Studies</strong> 60(3):257-269.</p></li>
 <li><p>Luy, M., Di Giulio, P., Di Lego, V., Lazarevič, P., Sauerberg, M. (2020). Life Expectancy: Frequently Used, but Hardly Understood. <strong>Gerontology</strong> 66:95-104.</p></li>
 <li><p>Modig, K., Rau, R., Ahlbom, A. (2020). Life expectancy: what does it measure? <strong>BMJ Open</strong> 10(7):e035932.</p></li>
