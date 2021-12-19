@@ -127,7 +127,7 @@ The first method for calculating the modal age at death with decimals is again t
 $$
 Modal(t) = x + \frac{[d(x,t)-d(x-1,t)]}{[d(x,t)-d(x-1,t)]+[d(x,t)-d(x+1,t)]},
 $$
-with $d(x,t)$ being the age-distribution of life tables death in time $t$ and age $x$ corresponds to the age where most deaths occur.
+with $d(x,t)$ being the age-distribution of life tables deaths in time $t$ and age $x$ corresponds to the age where most deaths occur.
 
 ```{r, warning=FALSE}
 ###getting data for US women in 2019
@@ -230,14 +230,41 @@ ModeAge <- function(dx, method = c("formula", "spline", "loess")) {
 }
 
 ###Lets test them
-MedianAge(LT.women$lx[LT.women$Year==2019], method="formula")
-MedianAge(LT.women$lx[LT.women$Year==2019], method="spline")
-MedianAge(LT.women$lx[LT.women$Year==2019], method="loess")
 
-ModeAge(LT.women$dx[LT.women$Year==2019], method="formula")
-ModeAge(LT.women$dx[LT.women$Year==2019], method="spline")
-ModeAge(LT.women$dx[LT.women$Year==2019], method="loess")
+Median.1 <- c()
+Median.2 <- c()
+Median.3 <- c()
+
+Modal.1 <- c()
+Modal.2 <- c()
+Modal.3 <- c()
+
+for (i in 1:length(1990:2019)) {
+  
+Median.1[i] <- MedianAge(lx = LT.women$lx[LT.women$Year==1989+i], method="formula")
+Median.2[i] <- MedianAge(lx = LT.women$lx[LT.women$Year==1989+i], method="spline")
+Median.3[i] <- MedianAge(lx = LT.women$lx[LT.women$Year==1989+i], method="loess")
+
+Modal.1[i] <- ModeAge(dx = LT.women$dx[LT.women$Year==1989+i], method="formula")
+Modal.2[i] <- ModeAge(dx = LT.women$dx[LT.women$Year==1989+i], method="spline")
+Modal.3[i] <- ModeAge(dx = LT.women$dx[LT.women$Year==1989+i], method="loess")
+
+}
 ```
+
+```{r Fig1, echo=FALSE, fig.height=10, fig.width=10}
+plot(1990:2019, Median.1, col="green", main="Median Age at Death", type="l")
+lines(1990:2019, Median.2, col="red")
+lines(1990:2019, Median.3, col="blue")
+legend(2010, 83, legend=c("formula","spline","loess"), lty=1, col=c("green","red","blue"))
+       
+plot(1990:2019, Modal.1, col="green", main="Modal Age at Death", type="l")
+lines(1990:2019, Modal.2, col="red")
+lines(1990:2019, Modal.3, col="blue")
+legend(2010, 87, legend=c("formula","spline","loess"), lty=1, col=c("green","red","blue"))
+       
+```
+The results suggest that all three methods produce similar results for the median age at death. For the modal age at death, method "formula" corresponds to the "spline" approach. The "loess" method, however, can lead to considerably different results.
 
 # References
 

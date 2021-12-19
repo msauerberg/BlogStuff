@@ -127,7 +127,7 @@ Median1.fun(lx = LT.women$lx[LT.women$Year==2019])</code></pre>
 <span class="math display">\[
 Modal(t) = x + \frac{[d(x,t)-d(x-1,t)]}{[d(x,t)-d(x-1,t)]+[d(x,t)-d(x+1,t)]},
 \]</span>
-with <span class="math inline">\(d(x,t)\)</span> being the age-distribution of life tables death in time <span class="math inline">\(t\)</span> and age <span class="math inline">\(x\)</span> corresponds to the age where most deaths occur.</p>
+with <span class="math inline">\(d(x,t)\)</span> being the age-distribution of life tables deaths in time <span class="math inline">\(t\)</span> and age <span class="math inline">\(x\)</span> corresponds to the age where most deaths occur.</p>
 <pre class="r"><code>###getting data for US women in 2019
 dx = LT.women$dx[LT.women$Year==2019]
 ### finding the age with highest number of deaths
@@ -226,18 +226,28 @@ ModeAge &lt;- function(dx, method = c(&quot;formula&quot;, &quot;spline&quot;, &
 }
 
 ###Lets test them
-MedianAge(LT.women$lx[LT.women$Year==2019], method=&quot;formula&quot;)</code></pre>
-<pre><code>## [1] 85.29959</code></pre>
-<pre class="r"><code>MedianAge(LT.women$lx[LT.women$Year==2019], method=&quot;spline&quot;)</code></pre>
-<pre><code>## [1] 85.3</code></pre>
-<pre class="r"><code>MedianAge(LT.women$lx[LT.women$Year==2019], method=&quot;loess&quot;)</code></pre>
-<pre><code>## [1] 85.3</code></pre>
-<pre class="r"><code>ModeAge(LT.women$dx[LT.women$Year==2019], method=&quot;formula&quot;)</code></pre>
-<pre><code>## [1] 88.65847</code></pre>
-<pre class="r"><code>ModeAge(LT.women$dx[LT.women$Year==2019], method=&quot;spline&quot;)</code></pre>
-<pre><code>## [1] 88.74962</code></pre>
-<pre class="r"><code>ModeAge(LT.women$dx[LT.women$Year==2019], method=&quot;loess&quot;)</code></pre>
-<pre><code>## [1] 88.6</code></pre>
+
+Median.1 &lt;- c()
+Median.2 &lt;- c()
+Median.3 &lt;- c()
+
+Modal.1 &lt;- c()
+Modal.2 &lt;- c()
+Modal.3 &lt;- c()
+
+for (i in 1:length(1990:2019)) {
+  
+Median.1[i] &lt;- MedianAge(lx = LT.women$lx[LT.women$Year==1989+i], method=&quot;formula&quot;)
+Median.2[i] &lt;- MedianAge(lx = LT.women$lx[LT.women$Year==1989+i], method=&quot;spline&quot;)
+Median.3[i] &lt;- MedianAge(lx = LT.women$lx[LT.women$Year==1989+i], method=&quot;loess&quot;)
+
+Modal.1[i] &lt;- ModeAge(dx = LT.women$dx[LT.women$Year==1989+i], method=&quot;formula&quot;)
+Modal.2[i] &lt;- ModeAge(dx = LT.women$dx[LT.women$Year==1989+i], method=&quot;spline&quot;)
+Modal.3[i] &lt;- ModeAge(dx = LT.women$dx[LT.women$Year==1989+i], method=&quot;loess&quot;)
+
+}</code></pre>
+<p><img src="{{< blogdown/postref >}}index.en_files/figure-html/Fig1-1.png" width="960" /><img src="{{< blogdown/postref >}}index.en_files/figure-html/Fig1-2.png" width="960" />
+The results suggest that all three methods produce similar results for the median age at death. For the modal age at death, method “formula” corresponds to the “spline” approach. The “loess” method, however, can lead to considerably different results.</p>
 </div>
 <div id="references" class="section level1">
 <h1>References</h1>
