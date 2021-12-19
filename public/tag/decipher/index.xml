@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>DecipheR | Markus Sauerberg</title>
+    <link>/tag/decipher/</link>
+      <atom:link href="/tag/decipher/index.xml" rel="self" type="application/rss+xml" />
+    <description>DecipheR</description>
+    <generator>Wowchemy (https://wowchemy.com)</generator><language>en-us</language><lastBuildDate>Wed, 14 Jul 2021 00:00:00 +0000</lastBuildDate>
+    <image>
+      <url>/media/icon_hua2ec155b4296a9c9791d015323e16eb5_11927_512x512_fill_lanczos_center_2.png</url>
+      <title>DecipheR</title>
+      <link>/tag/decipher/</link>
+    </image>
+    
+    <item>
+      <title>Encrypting (pass)words in R</title>
+      <link>/post/crypto/</link>
+      <pubDate>Wed, 14 Jul 2021 00:00:00 +0000</pubDate>
+      <guid>/post/crypto/</guid>
+      <description>
+
+
+&lt;div id=&#34;objective&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Objective&lt;/h1&gt;
+&lt;p&gt;After reading the book “History of Codes” by Simon Singh, I was inspired to apply some of the things that I have learned in R. While the book describes the history of codes in terms of encrpyting and decrypting messages (e.g., for secret communication), I will focus on managing passwords. Please note that the following is written for fun and should not be interpreted as an attempt to develop a flawless password manager. It is rather my first try of writing an encryption function. I hope it is useful for generating passwords for conferences, journals, or shopping webpages.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;background&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Background&lt;/h1&gt;
+&lt;p&gt;Encryption can be seen as substituting letters. As an example, each of the 26 letters of the alphabet could be shifted by one letter. This would result in “A -&amp;gt; B”, “B -&amp;gt; C”, “C -&amp;gt; D” and so forth. Using this substitution algorithm, the encryption of my name “Markus” results in “Nbslvt”. In order to decipher the word “Nbslvt” back to “Markus” one would need the key, i.e., a table indicating how the letters have been substituted. Obviously, the “shifted-by-one-letter” cipher can be figured out quite easily by most amateur code breakers and is not very safe. Throughout history scientists came up with much more sophisticated cipher codes and cipher machines in order to keep communication private. Especially, during the first and second World War secret communication became crucial for the military. With the rapid expansion of the internet, encrypting messages was no longer only a matter for governments and the military but also relevant for ordinary individuals. In my opinion, one of the most fascinating encryption technique is the Rivest–Shamir–Adleman (RSA) cryptosystem. This breakthrough idea uses one-way functions (functions that cannot easily be inverted) and the practical difficulty of factoring two prime numbers. The algorithm is without a doubt as genius and geeky as it gets. This video gives a very vivid explanation: &lt;a href=&#34;https://www.youtube.com/watch?v=4zahvcJ9glg&#34;&gt;Eddie Woo YouTube&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;my-implementation-in-r&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;My implementation in R&lt;/h1&gt;
+&lt;p&gt;My idea is much more simple and relies on combining the substitution of letters with randomly selected numbers. In other words, I do not use an algorithm such as shifting the alphabet by &lt;span class=&#34;math inline&#34;&gt;\(x\)&lt;/span&gt; characters, as I have described above, but let the sample() function in R determine the substitution pattern. More specifically, each letter in the encrypted word will be based on its own sample() call. The word “Hallo”, for example, contains the letter “l” twice (third and forth element of the string). The sample() function might lead to a substitution of “l -&amp;gt; k” for the first “l” and the second “l” might be substituted with b (l -&amp;gt; b). This makes is much harder to break the encryption code because of the extremely high number of substitution possibilities. The key for the encryption function is the given by the set.seed() argument. The set.seed() function suspends the randomness in the sample() call and therefore allows transforming the letters back to their original order.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;the-choice-of-the-alphabet&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;The choice of the alphabet&lt;/h1&gt;
+&lt;p&gt;My alphabet includes all 26 letters (in lower- and upper-case spelling), the numbers &lt;span class=&#34;math inline&#34;&gt;\(0\)&lt;/span&gt; to &lt;span class=&#34;math inline&#34;&gt;\(9\)&lt;/span&gt;, and a selection of special characters (!§$%&amp;amp;/()=?@*#&amp;lt;&amp;gt;_-.;+{}[]). The code can be easily modified in order to incorporate more special characters, i.e., Germans might want a “ö”, while Danes require “ø”, and the French prefer “ô”.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;CipherWord &amp;lt;- function(my.password, my.key) {
+
+    set.seed(my.key)
+    the.length &amp;lt;- length(unlist(strsplit(my.password, &amp;quot;&amp;quot;)))
+    the.vec &amp;lt;- unlist(strsplit(my.password, &amp;quot;&amp;quot;))
+    specials &amp;lt;- c(unlist(strsplit(&amp;quot;!§$%&amp;amp;/()=?@*#&amp;lt;&amp;gt;_-.;+{}[]&amp;quot;, &amp;quot;&amp;quot;)))
+    all.characters &amp;lt;- c(letters, LETTERS, 0:9, specials)
+
+    if (!all(the.vec %in% all.characters)) {
+    stop(&amp;quot;unkown character(s) in password&amp;quot;)
+    }
+
+    cipher.list &amp;lt;- NULL
+    for (i in 1:the.length) {
+        cipher.frame &amp;lt;- data.frame(alphabet = all.characters)
+        cipher.frame$alphabet &amp;lt;- levels(droplevels(cipher.frame$alphabet))
+        cipher.frame$cipher.num &amp;lt;- sample(1:length(cipher.frame$alphabet), length(cipher.frame$alphabet))
+        cipher.frame$cipherbet &amp;lt;- cipher.frame[order(cipher.frame$cipher.num), ]$alphabet
+        cipher.list[[i]] &amp;lt;- cipher.frame
+    }
+
+    encrypted.password &amp;lt;- c()
+    for (j in 1:the.length) {
+        encrypted.letter &amp;lt;- unlist(strsplit(my.password, &amp;quot;&amp;quot;))[j]
+        encrypted.password[j] &amp;lt;- cipher.list[[j]]$cipherbet[match(encrypted.letter, cipher.list[[j]]$alphabet)]
+    }
+
+    count &amp;lt;- any(encrypted.password %in% specials) +
+        any(encrypted.password %in% letters) +
+        any(encrypted.password %in% LETTERS)
+
+    if(count!=3) {
+        warning(&amp;quot;Encryption does not include lower, upper, and special characters&amp;quot;)
+        }
+
+    out &amp;lt;- rbind(cbind(&amp;quot;Original&amp;quot;,&amp;quot;Encrypted&amp;quot;),cbind(my.password,
+             paste(encrypted.password,collapse=&amp;quot;&amp;quot;)))
+
+    return(out)
+}
+
+# basically copy and paste
+DecipherWord &amp;lt;- function(my.encrypted.word, my.key) {
+
+    set.seed(my.key)
+    the.length &amp;lt;- length(unlist(strsplit(my.encrypted.word, &amp;quot;&amp;quot;)))
+    the.vec &amp;lt;- unlist(strsplit(my.encrypted.word, &amp;quot;&amp;quot;))
+    specials &amp;lt;- c(unlist(strsplit(&amp;quot;!§$%&amp;amp;/()=?@*#&amp;lt;&amp;gt;_-.;+{}[]&amp;quot;, &amp;quot;&amp;quot;)))
+    all.characters &amp;lt;- c(letters, LETTERS, 0:9, specials)
+
+    if (!all(the.vec %in% all.characters)) {
+    stop(&amp;quot;unkown character(s) in the encrypted word&amp;quot;)
+    }
+
+    cipher.list &amp;lt;- NULL
+    for (i in 1:the.length) {
+        cipher.frame &amp;lt;- data.frame(alphabet = all.characters)
+        cipher.frame$alphabet &amp;lt;- levels(droplevels(cipher.frame$alphabet))
+        cipher.frame$cipher.num &amp;lt;- sample(1:length(cipher.frame$alphabet), length(cipher.frame$alphabet))
+        cipher.frame$cipherbet &amp;lt;- cipher.frame[order(cipher.frame$cipher.num), ]$alphabet
+        cipher.list[[i]] &amp;lt;- cipher.frame
+    }
+
+    decrypted.password &amp;lt;- c()
+    for (j in 1:the.length) {
+        decrypted.letter &amp;lt;- unlist(strsplit(my.encrypted.word, &amp;quot;&amp;quot;))[j]
+        decrypted.password[j] &amp;lt;- cipher.list[[j]]$alphabet[match(decrypted.letter, cipher.list[[j]]$cipherbet)]
+    }
+
+    out &amp;lt;- rbind(cbind(&amp;quot;Encrypted&amp;quot;,&amp;quot;Decrypted&amp;quot;),cbind(my.encrypted.word,
+             paste(decrypted.password,collapse=&amp;quot;&amp;quot;)))
+
+    return(out)
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;how-does-it-work&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;How does it work?&lt;/h1&gt;
+&lt;p&gt;Imagine you are accepted at a conference and the upload of the paper requires setting up an account with your Email address and a password. You would love to choose an easy word such as “EasyPassword” but you are aware that this is neither secure nor accepted by most webpages. With the functions that I have provided above, it is possible to transform “EasyPassword” to “Q/VX@ezlQptv”. The CipherWord() function requires the word that you would like to encrypt and a key number (for set.seed). The key number becomes the user’s personal encryption key. One option to use CipherWord() is remembering one personal key and choosing easy passwords such as “PasswordPAA2021” for PAA in 2021 or “PasswordEPC2022” for EPC in 2022. Alternatively, the user can keep the password constant but change the encryption key. The encryption key might be based on a fancy function, refer to the date of a given conference, or the session number of the presentation. In the following example, I encrypt “EasyPassword” with the key “123” to the much safer password “Q/VX@ezlQptv”. The DecipherWord() function reverses the encryption as long as the user knows the right key (“123” in the example). Accordingly, the function can also be used to inform close colleagues (with access to the encryption key) about the secret lunch date location ^_^&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;CipherWord(&amp;quot;EasyPassword&amp;quot;, 123)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##      my.password                  
+## [1,] &amp;quot;Original&amp;quot;     &amp;quot;Encrypted&amp;quot;   
+## [2,] &amp;quot;EasyPassword&amp;quot; &amp;quot;Q/VX@ezlQptv&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;DecipherWord(&amp;quot;Q/VX@ezlQptv&amp;quot;, 123)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##      my.encrypted.word               
+## [1,] &amp;quot;Encrypted&amp;quot;       &amp;quot;Decrypted&amp;quot;   
+## [2,] &amp;quot;Q/VX@ezlQptv&amp;quot;    &amp;quot;EasyPassword&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;the-challenge-of-password-requirements&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;The challenge of password requirements&lt;/h1&gt;
+&lt;p&gt;I encounter mostly webpages with the requirement of selecting a password that includes lower- and upper case letters as well as at least one special character. At the moment, the function CipherWord() gives you a warning in case this requirements are not met. It is also possible to modify the function in a way that it automatically forces this combination of letters whenever necessary. However, the empirical analysis shown below indicates that this issue is relatively rare. Especially, if the input word is not too short (choosing a relative long password is actually always a good idea). For this reason, I do not take any specific password requirements into account for the moment.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;specials &amp;lt;- c(unlist(strsplit(&amp;quot;!§$%&amp;amp;/()=?@*#&amp;lt;&amp;gt;_-.;+{}[]&amp;quot;, &amp;quot;&amp;quot;)))
+yes &amp;lt;- 0
+no &amp;lt;- 0
+
+for (i in 1:100) {
+    the.word &amp;lt;- CipherWord(&amp;quot;EasyPassword&amp;quot;, i)[2,2]
+    the.word &amp;lt;- unlist(strsplit(the.word, &amp;quot;&amp;quot;))
+
+    count &amp;lt;- any(the.word %in% specials) +
+        any(the.word %in% letters) +
+        any(the.word %in% LETTERS)
+
+    if (count==3) {
+        yes &amp;lt;- yes+1
+    }else{
+        no &amp;lt;- no+1
+    }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Warning in CipherWord(&amp;quot;EasyPassword&amp;quot;, i): Encryption does not include lower,
+## upper, and special characters
+
+## Warning in CipherWord(&amp;quot;EasyPassword&amp;quot;, i): Encryption does not include lower,
+## upper, and special characters
+
+## Warning in CipherWord(&amp;quot;EasyPassword&amp;quot;, i): Encryption does not include lower,
+## upper, and special characters
+
+## Warning in CipherWord(&amp;quot;EasyPassword&amp;quot;, i): Encryption does not include lower,
+## upper, and special characters&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;bars &amp;lt;- barplot(cbind(yes,no), col=&amp;quot;lightgray&amp;quot;,
+                main=&amp;quot;Include lower-, upper-, and specical characters?&amp;quot;,
+                cex.main=1.5
+                )
+text(bars, 40, paste(cbind(yes,no), &amp;quot;times&amp;quot;, &amp;quot; &amp;quot;), cex=1.5)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/crypto/index.en_files/figure-html/unnamed-chunk-3-1.png&#34; width=&#34;672&#34; /&gt;
+Now, the same procedure but with a longer input word (LongerPasswordsAreBetter).&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;yes &amp;lt;- 0
+no &amp;lt;- 0
+
+for (i in 1:100) {
+    the.word &amp;lt;- CipherWord(&amp;quot;LongerPasswordsAreBetter&amp;quot;, i)[2,2]
+    the.word &amp;lt;- unlist(strsplit(the.word, &amp;quot;&amp;quot;))
+
+    count &amp;lt;- any(the.word %in% specials) +
+        any(the.word %in% letters) +
+        any(the.word %in% LETTERS)
+
+    if (count==3) {
+        yes &amp;lt;- yes+1
+    }else{
+        no &amp;lt;- no+1
+    }
+}
+
+bars &amp;lt;- barplot(cbind(yes,no), col=&amp;quot;lightgray&amp;quot;,
+                main=&amp;quot;Include lower-, upper-, and specical characters?&amp;quot;,
+                cex.main=1.5
+                )
+text(bars, 40, paste(cbind(yes,no), &amp;quot;times&amp;quot;, &amp;quot; &amp;quot;), cex=1.5)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/crypto/index.en_files/figure-html/unnamed-chunk-4-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;references&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;References&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;Singh, Simon (2002). The Code Book: The Secret History of Codes and Code-Breaking. Harper Collins Publishers UK: (Reissue) Edition.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,253 @@
+---
+title: "Calculating Median Age at Death and Modal Age at Death with Decimals"
+author: ''
+date: '2021-12-19'
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+categories: []
+tags: []
+subtitle: ''
+summary: ''
+authors: []
+lastmod: '2021-12-19T11:35:45+02:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+slug: MedianMode
+---
+
+# Background
+Longevity is often measured through time trends in the mean age at death (MAD). In addition to MAD, there are two other interesting metrics, which can be calculated from life table functions. Namely, the median age at death and the modal age at death. The former refers to the age when half of the population has died, while the latter defines the age where most deaths are observed. Demographers are often interested in analyzing these two figures with decimals precision. In the previous literature, several methods for this purpose have been proposed. I selected some of them and provide R functions, enabling researchers to calculate the median age at death and the modal age at death with decimals points. To the best of my knowledge, there are currently no R functions on this topic. So, please feel free to improve and extent this work. As mentioned above, I focus on methods that can be applied to life table functions. For simplicity, I do not consider methods using smoothed death rates (smoothing age-specific death counts with the corresponding exposure as offsets and deriving death rates).
+
+# Calculating the Median Age at Death with Decimals
+One method for calculating the median age at death has been described by Canudas-Romo (2010) wich is based on the work of Kannisto (2001).  My Rcode focuses on equation A1 in Canudas-Romo (2010),
+$$
+Median(t) = x + \frac{[0.5 - l(x,t)]}{[l(x+1, t) - l(x,t)]},
+$$
+where $l(x,t)$ denotes the life table survivorship function in time $t$ and age $x$ and $x+1$ correspond to the ages surrounding the median age at death, i.e., the exact age where $l(x,t)=0.5$.
+In the following, I will apply this equation to data for the US in R. The period life tables for the USA are downloaded from the [HMD](https://mortality.org). 
+
+```{r, warning=FALSE}
+setwd("d:/Rcode/Data/USA")
+LT.women <- read.table("fltper_1x1.txt", header=TRUE, skip=2)
+
+
+### getting the lx function for women in 2019
+lx = LT.women$lx[LT.women$Year==2019]
+### getting our ages, 0-110
+last.age = length(lx)-1
+age = 0:last.age
+###normalize to 1
+Sx = lx/lx[1]
+### finding the last age before half of the population has died
+x = Sx - 0.5
+the.x = which(x==min(x[x>0]))
+###applying the formula
+Median = age[the.x] + ((0.5 - Sx[the.x]) / (Sx[the.x+1] - Sx[the.x]))
+
+###corresponding function
+Median1.fun <- function(lx) {
+  
+  Sx = lx/lx[1]
+  x = Sx - 0.5
+  the.x = which(x==min(x[x>0]))
+  Median = age[the.x] + ((0.5 - Sx[the.x]) / (Sx[the.x+1] - Sx[the.x]))
+  
+  return(Median)
+}
+
+```
+In addition, I test the performance of modeling the $l(x,t)$ function and predicting it for ages with decimal points. This idea is based on work by Ouellette \& Bourbeau (2011) and Horiuchi et al. (2013). 
+
+```{r, warning=FALSE}
+### using the splinefun
+smooth.lx = splinefun(lx ~ age)
+###you can modify the "by argument" for smaller age intervals
+decimal.lx = smooth.lx(seq(0,age[length(age)], by=0.1))
+smooth.Sx = decimal.lx/decimal.lx[1]
+x = smooth.Sx - 0.5
+the.x = which.min(abs(smooth.Sx - 0.5))
+Median = seq(0,110, by=0.1)[the.x]
+
+###corresponding function
+Median2.fun <- function(lx) {
+  
+  last.age = length(lx)-1
+  age = 0:last.age
+  smooth.lx = splinefun(lx ~ age)
+  decimal.lx = smooth.lx(seq(0, age[length(age)], by=0.1))
+  smooth.Sx = decimal.lx/decimal.lx[1]
+  x = smooth.Sx - 0.5
+  the.x = which.min(abs(smooth.Sx - 0.5))
+  Median = seq(0, age[length(age)], by=0.1)[the.x]
+  
+  return(Median)
+}
+
+
+###using loess function
+smooth.lx = loess(lx ~ age, span=0.1, degree=2)
+decimal.lx = predict(smooth.lx, newdata=seq(0, age[length(age)], by=0.1))
+smooth.Sx = decimal.lx/decimal.lx[1]
+x = smooth.Sx - 0.5
+the.x = which.min(abs(smooth.Sx - 0.5))
+Median = seq(0, age[length(age)], by=0.1)[the.x]
+
+###corresponding function
+Median3.fun <- function(lx) {
+
+  last.age = length(lx)-1
+  age = 0:last.age
+  smooth.lx = loess(lx ~ age, span=0.1, degree=2)
+  decimal.lx = predict(smooth.lx, newdata=seq(0, age[length(age)], by=0.1))
+  smooth.Sx = decimal.lx/decimal.lx[1]
+  x = smooth.Sx - 0.5
+  the.x = which.min(abs(smooth.Sx - 0.5))
+  Median = seq(0, age[length(age)], by=0.1)[the.x]
+  
+  return(Median)
+  
+}
+
+###Lets test them out
+Median1.fun(lx = LT.women$lx[LT.women$Year==2019])
+Median2.fun(lx = LT.women$lx[LT.women$Year==2019])
+Median3.fun(lx = LT.women$lx[LT.women$Year==2019])
+
+```
+The results are very similar.
+
+# Calculating the Modal Age at Death with Decimals
+The first method for calculating the modal age at death with decimals is again taken from Canudas-Romo (2010). The equation can be found on page 309 in the paper,
+$$
+Modal(t) = x + \frac{[d(x,t)-d(x-1,t)]}{[d(x,t)-d(x-1,t)]+[d(x,t)-d(x+1,t)]},
+$$
+with $d(x,t)$ being the age-distribution of life tables death in time $t$ and age $x$ corresponds to the age where most deaths occur.
+
+```{r, warning=FALSE}
+###getting data for US women in 2019
+dx = LT.women$dx[LT.women$Year==2019]
+### finding the age with highest number of deaths
+the.x = which.max(dx)
+###applying the formula
+Mode = age[the.x] - 0.5 + (dx[the.x] - dx[the.x-1]) / 
+  ( (dx[the.x] - dx[the.x-1]) + (dx[the.x] - dx[the.x+1]) )
+
+###corresponding function
+Mode1.fun <- function(dx) {
+
+  last.age = length(dx)-1
+  age = 0:last.age
+  the.x = which.max(dx)
+  Mode = age[the.x] - 0.5 + (dx[the.x] - dx[the.x-1]) / 
+    ( (dx[the.x] - dx[the.x-1]) + (dx[the.x] - dx[the.x+1]) )
+
+  return(Mode)  
+}
+```
+Again, the other two methods are based on smoothing age-specific death distributions and predicting deaths for small age intervals. While the first approach uses the optimization function in order to obtain the modal age at death with decimal precision (Ouellette \& Bourbeau 2011; Ebeling, Rau, and Baudisch 2018), the second uses R's loess() function. 
+
+```{r, warning=FALSE}
+### I do not consider infant mortality
+smooth.dx = splinefun(dx[-1] ~ age[-1])
+max.opt = optimize(smooth.dx, interval = c(30, 110), maximum = T)
+Mode = max.opt$maximum
+
+###corresponding function
+Mode2.fun <- function(dx) {
+
+  last.age = length(dx)-1
+  age = 0:last.age
+  smooth.dx = splinefun(dx[-1] ~ age[-1])
+  max.opt = optimize(smooth.dx, interval = c(30, 110), maximum = T)
+  Mode = max.opt$maximum
+  
+  return(Mode)
+}
+
+### The loess approach, again no infant mortality considered
+loess.smooth.dx = loess(dx[-1] ~ age[-1], span=0.1, degree = 2)
+y = predict(loess.smooth.dx, newdata = seq(1, age[length(age)], by=0.1))
+Mode = seq(1, age[length(age)], by=0.1)[which.max(y)]
+
+###the corresponding function
+Mode3.fun <- function(dx) {
+
+  loess.smooth.dx = loess(dx[-1] ~ age[-1], span=0.1, degree = 2)
+  y = predict(loess.smooth.dx, newdata = seq(1, age[length(age)], by=0.1))
+  Mode = seq(1, age[length(age)], by=0.1)[which.max(y)]
+
+  return(Mode)  
+}
+
+###Lets test it out
+Mode1.fun(dx = LT.women$dx[LT.women$Year==2019])
+Mode2.fun(dx = LT.women$dx[LT.women$Year==2019])
+Mode3.fun(dx = LT.women$dx[LT.women$Year==2019])
+```
+
+# Two General Function for the Median Age at Death and the Modal Age at Death
+Finally, I provide two general functions where the method can be selected through the function argument "method".
+
+```{r, warning=FALSE}
+MedianAge <- function(lx, method = c("formula", "spline", "loess")) {
+    
+  if (method == "formula") {
+    out <- Median1.fun(lx)
+  }
+  
+  if (method == "spline") {
+    out <- Median2.fun(lx)
+  }
+  
+  if (method == "loess") {
+    out <- Median3.fun(lx)
+  }
+  
+  return(out)
+}
+
+ModeAge <- function(dx, method = c("formula", "spline", "loess")) {
+  
+  if (method == "formula") {
+    out <- Mode1.fun(dx)
+  }
+  
+  if (method == "spline") {
+    out <- Mode2.fun(dx)
+  }
+  
+  if (method == "loess") {
+    out <- Mode3.fun(dx)
+  }
+  
+  return(out)
+}
+
+###Lets test them
+MedianAge(LT.women$lx[LT.women$Year==2019], method="formula")
+MedianAge(LT.women$lx[LT.women$Year==2019], method="spline")
+MedianAge(LT.women$lx[LT.women$Year==2019], method="loess")
+
+ModeAge(LT.women$dx[LT.women$Year==2019], method="formula")
+ModeAge(LT.women$dx[LT.women$Year==2019], method="spline")
+ModeAge(LT.women$dx[LT.women$Year==2019], method="loess")
+```
+
+# References
+
+- Canudas-Romo, V. (2010). Three Measures of Longevity: Time Trends and Record Values. **Demography** 47(2):299–312.
+
+- Ebeling, M.; Rau, R.; Baudisch, A. (2018). Rectangularization of the survival curve reconsidered: The maximum inner rectangle approach. **Population Studies** 72(3):369-379.
+
+- Horiuchi, S.; Ouellette, N.; Cheung, S.L.K, and Robine, J.-M. Modal age at death: lifespan indicator in the era of longevity extension. **Vienna Yearbook of Population Research 2013**, pp. 37-69. 
+
+- Kannisto, V. (2001). Mode and Dispersion of the Length of Life. **Population: An English Selection**13:159–71.
+
+- Ouellette, N. and Bourbeau, R. (2011). Changes in the age-at-death distribution in four low mortality countries: A nonparametric approach. **Demographic Research** 25(19):95-628.
+

@@ -1,0 +1,1430 @@
+<!DOCTYPE html><html lang="en-us" >
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  
+  
+  
+    <meta name="generator" content="Wowchemy 5.2.0 for Hugo" />
+  
+
+  
+
+  
+  
+  
+  
+  
+    
+    
+    
+  
+  
+
+  <meta name="author" content="Markus Sauerberg" />
+
+  
+  
+  
+    
+  
+  <meta name="description" content="Generate a strong password from an easy one" />
+
+  
+  <link rel="alternate" hreflang="en-us" href="/post/crypto/" />
+
+  
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  
+
+  
+  
+  
+    <meta name="theme-color" content="#3f51b5" />
+  
+
+  
+  
+    
+    <script src="/js/mathjax-config.js"></script>
+  
+
+  
+  
+  
+  
+    
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" integrity="sha256-FMvZuGapsJLjouA6k7Eo2lusoAX9i0ShlWFG6qt7SLc=" crossorigin="anonymous">
+
+    
+    
+    
+    
+      
+      
+    
+    
+    
+
+    
+    
+    
+      
+    
+    
+      
+      
+        
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.2.0/styles/github.min.css" crossorigin="anonymous" title="hl-light" media="print" onload="this.media='all'">
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.2.0/styles/dracula.min.css" crossorigin="anonymous" title="hl-dark" media="print" onload="this.media='all'" disabled>
+        
+      
+    
+
+    
+    
+    
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.min.css" integrity="sha512-1xoFisiGdy9nvho8EgXuXvnpR5GAMSjFwp40gSRE3NwdUdIMIKuPa7bqoUhLD0O/5tPNhteAsE5XyyMi5reQVA==" crossorigin="anonymous" media="print" onload="this.media='all'">
+    
+
+    
+
+    
+    
+      
+      
+
+      
+      
+
+      
+    
+      
+      
+
+      
+      
+
+      
+    
+      
+      
+
+      
+      
+
+      
+    
+      
+      
+
+      
+      
+
+      
+    
+      
+      
+
+      
+      
+
+      
+    
+      
+      
+
+      
+      
+
+      
+    
+      
+      
+
+      
+      
+
+      
+    
+      
+      
+
+      
+      
+
+      
+    
+      
+      
+
+      
+      
+
+      
+    
+      
+      
+
+      
+      
+
+      
+    
+      
+      
+
+      
+      
+
+      
+    
+      
+      
+
+      
+      
+
+      
+    
+      
+      
+
+      
+      
+
+      
+    
+      
+      
+
+      
+      
+
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" integrity="" crossorigin="anonymous" async></script>
+      
+    
+      
+      
+
+      
+      
+
+      
+    
+      
+      
+
+      
+      
+
+      
+    
+  
+
+  
+  
+  
+    
+      
+      <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Roboto+Mono&family=Roboto:wght@400;700&display=swap">
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Roboto+Mono&family=Roboto:wght@400;700&display=swap" media="print" onload="this.media='all'">
+    
+  
+
+  
+  
+  
+  
+  
+  <link rel="stylesheet" href="/css/wowchemy.e0fdc8dd3293d443eb337d05f22a677f.css" />
+
+  
+
+
+
+  
+
+  
+
+  
+
+
+
+
+  
+  
+  
+
+  
+
+  
+    <link rel="manifest" href="/index.webmanifest" />
+  
+
+  <link rel="icon" type="image/png" href="/media/icon_hua2ec155b4296a9c9791d015323e16eb5_11927_32x32_fill_lanczos_center_2.png" />
+  <link rel="apple-touch-icon" type="image/png" href="/media/icon_hua2ec155b4296a9c9791d015323e16eb5_11927_180x180_fill_lanczos_center_2.png" />
+
+  <link rel="canonical" href="/post/crypto/" />
+
+  
+  
+  
+  
+  
+  
+  
+  
+    
+  
+  
+  <meta property="twitter:card" content="summary_large_image" />
+  
+  <meta property="og:site_name" content="Markus Sauerberg" />
+  <meta property="og:url" content="/post/crypto/" />
+  <meta property="og:title" content="Encrypting (pass)words in R | Markus Sauerberg" />
+  <meta property="og:description" content="Generate a strong password from an easy one" /><meta property="og:image" content="/post/crypto/featured.jpg" />
+    <meta property="twitter:image" content="/post/crypto/featured.jpg" /><meta property="og:locale" content="en-us" />
+  
+    
+      <meta
+        property="article:published_time"
+        content="2021-07-14T00:00:00&#43;00:00"
+      />
+    
+    <meta property="article:modified_time" content="2021-07-14T07:48:11&#43;02:00">
+  
+
+  
+
+
+    
+
+
+
+
+
+
+  
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "/post/crypto/"
+  },
+  "headline": "Encrypting (pass)words in R",
+  
+  "image": [
+    "/post/crypto/featured.jpg"
+  ],
+  
+  "datePublished": "2021-07-14T00:00:00Z",
+  "dateModified": "2021-07-14T07:48:11+02:00",
+  
+  "author": {
+    "@type": "Person",
+    "name": "Markus Sauerberg"
+  },
+  
+  "publisher": {
+    "@type": "Organization",
+    "name": "Markus Sauerberg",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "/media/icon_hua2ec155b4296a9c9791d015323e16eb5_11927_192x192_fill_lanczos_center_2.png"
+    }
+  },
+  "description": "Generate a strong password from an easy one"
+}
+</script>
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+  <title>Encrypting (pass)words in R | Markus Sauerberg</title>
+</head>
+
+
+<body id="top" data-spy="scroll" data-offset="70" data-target="#TableOfContents" class="page-wrapper   " data-wc-page-id="b3c3570cb314245ee612344d66e1238c" >
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <script src="/js/wowchemy-init.min.b8153d4570dcbb34350a2a846dba8c03.js"></script>
+
+  
+
+
+<aside class="search-modal" id="search">
+  <div class="container">
+    <section class="search-header">
+
+      <div class="row no-gutters justify-content-between mb-3">
+        <div class="col-6">
+          <h1>Search</h1>
+        </div>
+        <div class="col-6 col-search-close">
+          <a class="js-search" href="#" aria-label="Close"><i class="fas fa-times-circle text-muted" aria-hidden="true"></i></a>
+        </div>
+      </div>
+
+      <div id="search-box">
+        
+        <input name="q" id="search-query" placeholder="Search..." autocapitalize="off"
+        autocomplete="off" autocorrect="off" spellcheck="false" type="search" class="form-control"
+        aria-label="Search...">
+        
+      </div>
+
+      
+      
+
+      
+
+    </section>
+    <section class="section-search-results">
+
+      <div id="search-hits">
+        
+      </div>
+
+    </section>
+  </div>
+</aside>
+
+
+
+  <div class="page-header">
+    
+
+
+
+
+
+
+
+
+
+
+
+
+<nav class="navbar navbar-expand-lg navbar-light compensate-for-scrollbar" id="navbar-main">
+  <div class="container-xl">
+
+    
+    <div class="d-none d-lg-inline-flex">
+      <a class="navbar-brand" href="/">Markus Sauerberg</a>
+    </div>
+    
+
+    
+    <button type="button" class="navbar-toggler" data-toggle="collapse"
+            data-target="#navbar-content" aria-controls="navbar-content" aria-expanded="false" aria-label="Toggle navigation">
+    <span><i class="fas fa-bars"></i></span>
+    </button>
+    
+
+    
+    <div class="navbar-brand-mobile-wrapper d-inline-flex d-lg-none">
+      <a class="navbar-brand" href="/">Markus Sauerberg</a>
+    </div>
+    
+
+    
+    
+    <div class="navbar-collapse main-menu-item collapse justify-content-start" id="navbar-content">
+
+      
+      <ul class="navbar-nav d-md-inline-flex">
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+
+        
+        
+        
+        
+
+        
+          
+            
+            
+          
+          
+            
+            
+            
+              
+            
+            
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#about"><span>About</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+
+        
+        
+        
+        
+
+        
+          
+            
+            
+          
+          
+            
+            
+            
+              
+            
+            
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#publications"><span>Publications</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+
+        
+        
+        
+        
+
+        
+          
+            
+            
+          
+          
+            
+            
+            
+              
+            
+            
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#projects"><span>Projects</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+
+        
+        
+        
+        
+
+        
+          
+            
+            
+          
+          
+            
+            
+            
+              
+            
+            
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#talks"><span>Talks</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+
+        
+        
+        
+        
+
+        
+          
+            
+            
+          
+          
+            
+            
+            
+              
+            
+            
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#posts"><span>Posts</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+
+        
+        
+        
+        
+
+        
+          
+            
+            
+          
+          
+            
+            
+            
+              
+            
+            
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#contact"><span>Contact</span></a>
+        </li>
+
+        
+        
+
+      
+
+        
+      </ul>
+    </div>
+
+    <ul class="nav-icons navbar-nav flex-row ml-auto d-flex pl-md-2">
+
+      
+      
+        
+          
+          <li class="nav-item d-none d-lg-inline-flex">
+            <a class="nav-link" href="https://twitter.com/MarkusSauerberg" data-toggle="tooltip" data-placement="bottom" title="Follow me on Twitter" target="_blank" rel="noopener" aria-label="Follow me on Twitter">
+              <i class="fab fa-twitter" aria-hidden="true"></i>
+            </a>
+          </li>
+        
+      
+
+      
+      
+      <li class="nav-item">
+        <a class="nav-link js-search" href="#" aria-label="Search"><i class="fas fa-search" aria-hidden="true"></i></a>
+      </li>
+      
+
+      
+      
+      <li class="nav-item dropdown theme-dropdown">
+        <a href="#" class="nav-link" data-toggle="dropdown" aria-haspopup="true" aria-label="Display preferences">
+          <i class="fas fa-moon" aria-hidden="true"></i>
+        </a>
+        <div class="dropdown-menu">
+          <a href="#" class="dropdown-item js-set-theme-light">
+            <span>Light</span>
+          </a>
+          <a href="#" class="dropdown-item js-set-theme-dark">
+            <span>Dark</span>
+          </a>
+          <a href="#" class="dropdown-item js-set-theme-auto">
+            <span>Automatic</span>
+          </a>
+        </div>
+      </li>
+      
+
+      
+      
+
+    </ul>
+
+  </div>
+</nav>
+
+
+  </div>
+
+  <div class="page-body">
+    <article class="article">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+
+<div class="article-container pt-3">
+  <h1>Encrypting (pass)words in R</h1>
+
+  
+
+  
+
+
+<div class="article-metadata">
+
+  
+  
+
+  
+  <span class="article-date">
+    
+    
+      
+          Last updated on
+      
+    
+    Jul 14, 2021
+  </span>
+  
+
+  
+
+  
+  <span class="middot-divider"></span>
+  <span class="article-reading-time">
+    7 min read
+  </span>
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+  
+
+</div>
+
+  
+
+
+
+
+
+</div>
+
+
+<div class="article-header article-container featured-image-wrapper mt-4 mb-4" style="max-width: 200px; max-height: 119px;">
+  <div style="position: relative">
+    <img src="/post/crypto/featured.jpg" alt="" class="featured-image">
+    
+  </div>
+</div>
+
+
+
+  <div class="article-container">
+
+    <div class="article-style">
+      
+
+
+<div id="objective" class="section level1">
+<h1>Objective</h1>
+<p>After reading the book “History of Codes” by Simon Singh, I was inspired to apply some of the things that I have learned in R. While the book describes the history of codes in terms of encrpyting and decrypting messages (e.g., for secret communication), I will focus on managing passwords. Please note that the following is written for fun and should not be interpreted as an attempt to develop a flawless password manager. It is rather my first try of writing an encryption function. I hope it is useful for generating passwords for conferences, journals, or shopping webpages.</p>
+</div>
+<div id="background" class="section level1">
+<h1>Background</h1>
+<p>Encryption can be seen as substituting letters. As an example, each of the 26 letters of the alphabet could be shifted by one letter. This would result in “A -&gt; B”, “B -&gt; C”, “C -&gt; D” and so forth. Using this substitution algorithm, the encryption of my name “Markus” results in “Nbslvt”. In order to decipher the word “Nbslvt” back to “Markus” one would need the key, i.e., a table indicating how the letters have been substituted. Obviously, the “shifted-by-one-letter” cipher can be figured out quite easily by most amateur code breakers and is not very safe. Throughout history scientists came up with much more sophisticated cipher codes and cipher machines in order to keep communication private. Especially, during the first and second World War secret communication became crucial for the military. With the rapid expansion of the internet, encrypting messages was no longer only a matter for governments and the military but also relevant for ordinary individuals. In my opinion, one of the most fascinating encryption technique is the Rivest–Shamir–Adleman (RSA) cryptosystem. This breakthrough idea uses one-way functions (functions that cannot easily be inverted) and the practical difficulty of factoring two prime numbers. The algorithm is without a doubt as genius and geeky as it gets. This video gives a very vivid explanation: <a href="https://www.youtube.com/watch?v=4zahvcJ9glg">Eddie Woo YouTube</a>.</p>
+</div>
+<div id="my-implementation-in-r" class="section level1">
+<h1>My implementation in R</h1>
+<p>My idea is much more simple and relies on combining the substitution of letters with randomly selected numbers. In other words, I do not use an algorithm such as shifting the alphabet by <span class="math inline">\(x\)</span> characters, as I have described above, but let the sample() function in R determine the substitution pattern. More specifically, each letter in the encrypted word will be based on its own sample() call. The word “Hallo”, for example, contains the letter “l” twice (third and forth element of the string). The sample() function might lead to a substitution of “l -&gt; k” for the first “l” and the second “l” might be substituted with b (l -&gt; b). This makes is much harder to break the encryption code because of the extremely high number of substitution possibilities. The key for the encryption function is the given by the set.seed() argument. The set.seed() function suspends the randomness in the sample() call and therefore allows transforming the letters back to their original order.</p>
+</div>
+<div id="the-choice-of-the-alphabet" class="section level1">
+<h1>The choice of the alphabet</h1>
+<p>My alphabet includes all 26 letters (in lower- and upper-case spelling), the numbers <span class="math inline">\(0\)</span> to <span class="math inline">\(9\)</span>, and a selection of special characters (!§$%&amp;/()=?@*#&lt;&gt;_-.;+{}[]). The code can be easily modified in order to incorporate more special characters, i.e., Germans might want a “ö”, while Danes require “ø”, and the French prefer “ô”.</p>
+<pre class="r"><code>CipherWord &lt;- function(my.password, my.key) {
+
+    set.seed(my.key)
+    the.length &lt;- length(unlist(strsplit(my.password, &quot;&quot;)))
+    the.vec &lt;- unlist(strsplit(my.password, &quot;&quot;))
+    specials &lt;- c(unlist(strsplit(&quot;!§$%&amp;/()=?@*#&lt;&gt;_-.;+{}[]&quot;, &quot;&quot;)))
+    all.characters &lt;- c(letters, LETTERS, 0:9, specials)
+
+    if (!all(the.vec %in% all.characters)) {
+    stop(&quot;unkown character(s) in password&quot;)
+    }
+
+    cipher.list &lt;- NULL
+    for (i in 1:the.length) {
+        cipher.frame &lt;- data.frame(alphabet = all.characters)
+        cipher.frame$alphabet &lt;- levels(droplevels(cipher.frame$alphabet))
+        cipher.frame$cipher.num &lt;- sample(1:length(cipher.frame$alphabet), length(cipher.frame$alphabet))
+        cipher.frame$cipherbet &lt;- cipher.frame[order(cipher.frame$cipher.num), ]$alphabet
+        cipher.list[[i]] &lt;- cipher.frame
+    }
+
+    encrypted.password &lt;- c()
+    for (j in 1:the.length) {
+        encrypted.letter &lt;- unlist(strsplit(my.password, &quot;&quot;))[j]
+        encrypted.password[j] &lt;- cipher.list[[j]]$cipherbet[match(encrypted.letter, cipher.list[[j]]$alphabet)]
+    }
+
+    count &lt;- any(encrypted.password %in% specials) +
+        any(encrypted.password %in% letters) +
+        any(encrypted.password %in% LETTERS)
+
+    if(count!=3) {
+        warning(&quot;Encryption does not include lower, upper, and special characters&quot;)
+        }
+
+    out &lt;- rbind(cbind(&quot;Original&quot;,&quot;Encrypted&quot;),cbind(my.password,
+             paste(encrypted.password,collapse=&quot;&quot;)))
+
+    return(out)
+}
+
+# basically copy and paste
+DecipherWord &lt;- function(my.encrypted.word, my.key) {
+
+    set.seed(my.key)
+    the.length &lt;- length(unlist(strsplit(my.encrypted.word, &quot;&quot;)))
+    the.vec &lt;- unlist(strsplit(my.encrypted.word, &quot;&quot;))
+    specials &lt;- c(unlist(strsplit(&quot;!§$%&amp;/()=?@*#&lt;&gt;_-.;+{}[]&quot;, &quot;&quot;)))
+    all.characters &lt;- c(letters, LETTERS, 0:9, specials)
+
+    if (!all(the.vec %in% all.characters)) {
+    stop(&quot;unkown character(s) in the encrypted word&quot;)
+    }
+
+    cipher.list &lt;- NULL
+    for (i in 1:the.length) {
+        cipher.frame &lt;- data.frame(alphabet = all.characters)
+        cipher.frame$alphabet &lt;- levels(droplevels(cipher.frame$alphabet))
+        cipher.frame$cipher.num &lt;- sample(1:length(cipher.frame$alphabet), length(cipher.frame$alphabet))
+        cipher.frame$cipherbet &lt;- cipher.frame[order(cipher.frame$cipher.num), ]$alphabet
+        cipher.list[[i]] &lt;- cipher.frame
+    }
+
+    decrypted.password &lt;- c()
+    for (j in 1:the.length) {
+        decrypted.letter &lt;- unlist(strsplit(my.encrypted.word, &quot;&quot;))[j]
+        decrypted.password[j] &lt;- cipher.list[[j]]$alphabet[match(decrypted.letter, cipher.list[[j]]$cipherbet)]
+    }
+
+    out &lt;- rbind(cbind(&quot;Encrypted&quot;,&quot;Decrypted&quot;),cbind(my.encrypted.word,
+             paste(decrypted.password,collapse=&quot;&quot;)))
+
+    return(out)
+}</code></pre>
+</div>
+<div id="how-does-it-work" class="section level1">
+<h1>How does it work?</h1>
+<p>Imagine you are accepted at a conference and the upload of the paper requires setting up an account with your Email address and a password. You would love to choose an easy word such as “EasyPassword” but you are aware that this is neither secure nor accepted by most webpages. With the functions that I have provided above, it is possible to transform “EasyPassword” to “Q/VX@ezlQptv”. The CipherWord() function requires the word that you would like to encrypt and a key number (for set.seed). The key number becomes the user’s personal encryption key. One option to use CipherWord() is remembering one personal key and choosing easy passwords such as “PasswordPAA2021” for PAA in 2021 or “PasswordEPC2022” for EPC in 2022. Alternatively, the user can keep the password constant but change the encryption key. The encryption key might be based on a fancy function, refer to the date of a given conference, or the session number of the presentation. In the following example, I encrypt “EasyPassword” with the key “123” to the much safer password “Q/VX@ezlQptv”. The DecipherWord() function reverses the encryption as long as the user knows the right key (“123” in the example). Accordingly, the function can also be used to inform close colleagues (with access to the encryption key) about the secret lunch date location ^_^</p>
+<pre class="r"><code>CipherWord(&quot;EasyPassword&quot;, 123)</code></pre>
+<pre><code>##      my.password                  
+## [1,] &quot;Original&quot;     &quot;Encrypted&quot;   
+## [2,] &quot;EasyPassword&quot; &quot;Q/VX@ezlQptv&quot;</code></pre>
+<pre class="r"><code>DecipherWord(&quot;Q/VX@ezlQptv&quot;, 123)</code></pre>
+<pre><code>##      my.encrypted.word               
+## [1,] &quot;Encrypted&quot;       &quot;Decrypted&quot;   
+## [2,] &quot;Q/VX@ezlQptv&quot;    &quot;EasyPassword&quot;</code></pre>
+</div>
+<div id="the-challenge-of-password-requirements" class="section level1">
+<h1>The challenge of password requirements</h1>
+<p>I encounter mostly webpages with the requirement of selecting a password that includes lower- and upper case letters as well as at least one special character. At the moment, the function CipherWord() gives you a warning in case this requirements are not met. It is also possible to modify the function in a way that it automatically forces this combination of letters whenever necessary. However, the empirical analysis shown below indicates that this issue is relatively rare. Especially, if the input word is not too short (choosing a relative long password is actually always a good idea). For this reason, I do not take any specific password requirements into account for the moment.</p>
+<pre class="r"><code>specials &lt;- c(unlist(strsplit(&quot;!§$%&amp;/()=?@*#&lt;&gt;_-.;+{}[]&quot;, &quot;&quot;)))
+yes &lt;- 0
+no &lt;- 0
+
+for (i in 1:100) {
+    the.word &lt;- CipherWord(&quot;EasyPassword&quot;, i)[2,2]
+    the.word &lt;- unlist(strsplit(the.word, &quot;&quot;))
+
+    count &lt;- any(the.word %in% specials) +
+        any(the.word %in% letters) +
+        any(the.word %in% LETTERS)
+
+    if (count==3) {
+        yes &lt;- yes+1
+    }else{
+        no &lt;- no+1
+    }
+}</code></pre>
+<pre><code>## Warning in CipherWord(&quot;EasyPassword&quot;, i): Encryption does not include lower,
+## upper, and special characters
+
+## Warning in CipherWord(&quot;EasyPassword&quot;, i): Encryption does not include lower,
+## upper, and special characters
+
+## Warning in CipherWord(&quot;EasyPassword&quot;, i): Encryption does not include lower,
+## upper, and special characters
+
+## Warning in CipherWord(&quot;EasyPassword&quot;, i): Encryption does not include lower,
+## upper, and special characters</code></pre>
+<pre class="r"><code>bars &lt;- barplot(cbind(yes,no), col=&quot;lightgray&quot;,
+                main=&quot;Include lower-, upper-, and specical characters?&quot;,
+                cex.main=1.5
+                )
+text(bars, 40, paste(cbind(yes,no), &quot;times&quot;, &quot; &quot;), cex=1.5)</code></pre>
+<p><img src="/post/crypto/index.en_files/figure-html/unnamed-chunk-3-1.png" width="672" />
+Now, the same procedure but with a longer input word (LongerPasswordsAreBetter).</p>
+<pre class="r"><code>yes &lt;- 0
+no &lt;- 0
+
+for (i in 1:100) {
+    the.word &lt;- CipherWord(&quot;LongerPasswordsAreBetter&quot;, i)[2,2]
+    the.word &lt;- unlist(strsplit(the.word, &quot;&quot;))
+
+    count &lt;- any(the.word %in% specials) +
+        any(the.word %in% letters) +
+        any(the.word %in% LETTERS)
+
+    if (count==3) {
+        yes &lt;- yes+1
+    }else{
+        no &lt;- no+1
+    }
+}
+
+bars &lt;- barplot(cbind(yes,no), col=&quot;lightgray&quot;,
+                main=&quot;Include lower-, upper-, and specical characters?&quot;,
+                cex.main=1.5
+                )
+text(bars, 40, paste(cbind(yes,no), &quot;times&quot;, &quot; &quot;), cex=1.5)</code></pre>
+<p><img src="/post/crypto/index.en_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+</div>
+<div id="references" class="section level1">
+<h1>References</h1>
+<ul>
+<li>Singh, Simon (2002). The Code Book: The Secret History of Codes and Code-Breaking. Harper Collins Publishers UK: (Reissue) Edition.</li>
+</ul>
+</div>
+
+    </div>
+
+    
+
+
+
+
+
+
+<div class="article-tags">
+  
+  <a class="badge badge-light" href="/tag/r-coding/">R Coding</a>
+  
+  <a class="badge badge-light" href="/tag/decipher/">DecipheR</a>
+  
+</div>
+
+
+
+<div class="share-box" aria-hidden="true">
+  <ul class="share">
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://twitter.com/intent/tweet?url=/post/crypto/&amp;text=Encrypting%20%28pass%29words%20in%20R" target="_blank" rel="noopener" class="share-btn-twitter">
+          <i class="fab fa-twitter"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://www.facebook.com/sharer.php?u=/post/crypto/&amp;t=Encrypting%20%28pass%29words%20in%20R" target="_blank" rel="noopener" class="share-btn-facebook">
+          <i class="fab fa-facebook"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="mailto:?subject=Encrypting%20%28pass%29words%20in%20R&amp;body=/post/crypto/" target="_blank" rel="noopener" class="share-btn-email">
+          <i class="fas fa-envelope"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://www.linkedin.com/shareArticle?url=/post/crypto/&amp;title=Encrypting%20%28pass%29words%20in%20R" target="_blank" rel="noopener" class="share-btn-linkedin">
+          <i class="fab fa-linkedin-in"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="whatsapp://send?text=Encrypting%20%28pass%29words%20in%20R%20/post/crypto/" target="_blank" rel="noopener" class="share-btn-whatsapp">
+          <i class="fab fa-whatsapp"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://service.weibo.com/share/share.php?url=/post/crypto/&amp;title=Encrypting%20%28pass%29words%20in%20R" target="_blank" rel="noopener" class="share-btn-weibo">
+          <i class="fab fa-weibo"></i>
+        </a>
+      </li>
+    
+  </ul>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+
+
+  
+  
+  
+    
+  
+  
+  
+  <div class="media author-card content-widget-hr">
+    
+      
+      <img class="avatar mr-3 avatar-circle" src="/author/markus-sauerberg/avatar_hu85600003b06f148cb874faf203139ad0_187860_270x270_fill_q75_lanczos_center.jpg" alt="Markus Sauerberg">
+    
+
+    <div class="media-body">
+      <h5 class="card-title">Markus Sauerberg</h5>
+      <h6 class="card-subtitle">Research Scientist</h6>
+      
+      <ul class="network-icon" aria-hidden="true">
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="/#contact" >
+        <i class="fas fa-envelope"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://twitter.com/MarkusSauerberg" target="_blank" rel="noopener">
+        <i class="fab fa-twitter"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://github.com/msauerberg" target="_blank" rel="noopener">
+        <i class="fab fa-github"></i>
+      </a>
+    </li>
+  
+</ul>
+
+    </div>
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <div class="article-widget content-widget-hr">
+    <h3>Related</h3>
+    <ul>
+      
+      <li><a href="/post/getting-started/">Reconstruction life table functions from life expectancy</a></li>
+      
+    </ul>
+  </div>
+  
+
+
+
+
+
+  </div>
+</article>
+  </div>
+
+  <div class="page-footer">
+    
+    
+    <div class="container">
+      <footer class="site-footer">
+
+  
+
+  
+
+  
+
+  
+  
+
+
+
+
+
+
+  <p class="powered-by">
+    
+    
+    
+      
+      
+      
+      
+      
+      
+      Published with <a href="https://wowchemy.com/?utm_campaign=poweredby" target="_blank" rel="noopener">Wowchemy</a> — the free, <a href="https://github.com/wowchemy/wowchemy-hugo-modules" target="_blank" rel="noopener">open source</a> website builder that empowers creators.
+    
+  </p>
+</footer>
+
+    </div>
+    
+  </div>
+
+  
+<div id="modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cite</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <pre><code class="tex hljs"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-outline-primary my-1 js-copy-cite" href="#" target="_blank">
+          <i class="fas fa-copy"></i> Copy
+        </a>
+        <a class="btn btn-outline-primary my-1 js-download-cite" href="#" target="_blank">
+          <i class="fas fa-download"></i> Download
+        </a>
+        <div id="modal-error"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+      
+
+    
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/instant.page/5.1.0/instantpage.min.js" integrity="sha512-1+qUtKoh9XZW7j+6LhRMAyOrgSQKenQ4mluTR+cvxXjP1Z54RxZuzstR/H9kgPXQsVB8IW7DMDFUJpzLjvhGSQ==" crossorigin="anonymous"></script>
+
+      
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js" integrity="sha256-lqvxZrPLtfffUl2G/e7szqSvPBILGbwmsGE1MKlOi0Q=" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js" integrity="sha256-CBrpuqrMhXwcLLUd5tvQ4euBHCdh7wGlDfNz8vbu/iI=" crossorigin="anonymous"></script>
+      
+
+      
+      
+
+      
+
+      
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.2.0/highlight.min.js" integrity="sha512-TDKKr+IvoqZnPzc3l35hdjpHD0m+b2EC2SrLEgKDRWpxf2rFCxemkgvJ5kfU48ip+Y+m2XVKyOCD85ybtlZDmw==" crossorigin="anonymous"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.2.0/languages/r.min.js"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.2.0/languages/python.min.js"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.2.0/languages/latex.min.js"></script>
+        
+      
+
+    
+
+    
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.min.js" integrity="sha512-SeiQaaDh73yrb56sTW/RgVdi/mMqNeM2oBwubFHagc5BkixSpP1fvqF47mKzPGWYSSy4RwbBunrJBQ4Co8fRWA==" crossorigin="anonymous"></script>
+    
+
+    
+    
+
+    
+    
+    
+      
+      <script id="search-hit-fuse-template" type="text/x-template">
+        <div class="search-hit" id="summary-{{key}}">
+          <div class="search-hit-content">
+            <div class="search-hit-name">
+              <a href="{{relpermalink}}">{{title}}</a>
+              <div class="article-metadata search-hit-type">{{type}}</div>
+              <p class="search-hit-description">{{snippet}}</p>
+            </div>
+          </div>
+        </div>
+      </script>
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.2.1/fuse.min.js" integrity="sha256-VzgmKYmhsGNNN4Ph1kMW+BjoYJM2jV5i4IlFoeZA9XI=" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
+      
+    
+
+    
+    
+
+    
+    
+    
+    
+
+    
+    <script src="/js/bootstrap.bundle.min.6aed84840afc03ab4d5750157f69c120.js"></script>
+
+    
+    
+      
+      
+      
+      
+      
+      
+      
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+      
+      
+    
+    
+    <script src="/en/js/wowchemy.min.4bba0826db6409c865d2e7b99039d6d0.js"></script>
+
+    
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+
+
+
+
+</body>
+</html>

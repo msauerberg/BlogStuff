@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Michel Guillot | Markus Sauerberg</title>
+    <link>/author/michel-guillot/</link>
+      <atom:link href="/author/michel-guillot/index.xml" rel="self" type="application/rss+xml" />
+    <description>Michel Guillot</description>
+    <generator>Wowchemy (https://wowchemy.com)</generator><language>en-us</language><lastBuildDate>Mon, 31 Aug 2020 00:00:00 +0000</lastBuildDate>
+    <image>
+      <url>/media/icon_hua2ec155b4296a9c9791d015323e16eb5_11927_512x512_fill_lanczos_center_2.png</url>
+      <title>Michel Guillot</title>
+      <link>/author/michel-guillot/</link>
+    </image>
+    
+    <item>
+      <title>The cross-sectional average length of healthy life (HCAL): a measure that summarizes the history of cohort health and mortality</title>
+      <link>/publication/hcal/</link>
+      <pubDate>Mon, 31 Aug 2020 00:00:00 +0000</pubDate>
+      <guid>/publication/hcal/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>

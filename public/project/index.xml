@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Projects | Markus Sauerberg</title>
+    <link>/project/</link>
+      <atom:link href="/project/index.xml" rel="self" type="application/rss+xml" />
+    <description>Projects</description>
+    <generator>Wowchemy (https://wowchemy.com)</generator><language>en-us</language><lastBuildDate>Sat, 03 Jul 2021 00:00:00 +0000</lastBuildDate>
+    <image>
+      <url>/media/icon_hua2ec155b4296a9c9791d015323e16eb5_11927_512x512_fill_lanczos_center_2.png</url>
+      <title>Projects</title>
+      <link>/project/</link>
+    </image>
+    
+    <item>
+      <title>Shiny App for testing prevalence smoothing</title>
+      <link>/project/external-project/</link>
+      <pubDate>Sat, 03 Jul 2021 00:00:00 +0000</pubDate>
+      <guid>/project/external-project/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Levels and trends of health expectancy</title>
+      <link>/project/internal-project/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>/project/internal-project/</guid>
+      <description>&lt;p&gt;Good health is central to human happiness and wellbeing. It also contributes substantially to economic progress, as healthy populations live longer and are more productive. Accordingly, the EU defined the improvement of health as a fundamental element of its &amp;ldquo;Europe 2020&amp;rdquo; strategy. The corresponding public health policies are assessed on the basis of a structural indicator for &amp;ldquo;Health Expectancy&amp;rdquo; (HE). Unfortunately, HE estimates are extremely sensitive to certain methodological issues of which many are widely ignored. First, the common measurement of population health by the responses to specific survey questions is ambiguous. As a consequence, statistics on levels and trends of HE vary significantly depending on the underlying survey data and health indicators. Almost completely unrecognized is a second problem: HE estimates are also highly sensitive to particular technical features, e.g. the age range and partitioning selected for analysis and the technique chosen to add the health dimension to the life table. The efforts that have been hitherto undertaken to improve the estimation of HE focus primarily on the measurement of health with surveys, whereas the effects of the chosen HE indicator, data and method remain largely unexplored. The central aim of LETHE is to fill these gaps through a systematic exploration of the HE indicator&amp;rsquo;s sensitivity to these issues. To emphasize the empirical significance of the research, the effects will be investigated in the context of some major actual research questions, in particular the &amp;ldquo;compression versus expansion of morbidity&amp;rdquo; debate and the differences in HE between European populations and subpopulations. Finally, the project aims to identify the particular health measure that is most strongly associated with people&amp;rsquo;s actual happiness. These innovative approaches feature the potential to provide not only new insights into the levels and trends of HE, but also about its main drivers and causation mechanisms.&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

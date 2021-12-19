@@ -1,0 +1,403 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>R Coding | Markus Sauerberg</title>
+    <link>/tag/r-coding/</link>
+      <atom:link href="/tag/r-coding/index.xml" rel="self" type="application/rss+xml" />
+    <description>R Coding</description>
+    <generator>Wowchemy (https://wowchemy.com)</generator><language>en-us</language><lastBuildDate>Wed, 14 Jul 2021 00:00:00 +0000</lastBuildDate>
+    <image>
+      <url>/media/icon_hua2ec155b4296a9c9791d015323e16eb5_11927_512x512_fill_lanczos_center_2.png</url>
+      <title>R Coding</title>
+      <link>/tag/r-coding/</link>
+    </image>
+    
+    <item>
+      <title>Encrypting (pass)words in R</title>
+      <link>/post/crypto/</link>
+      <pubDate>Wed, 14 Jul 2021 00:00:00 +0000</pubDate>
+      <guid>/post/crypto/</guid>
+      <description>
+
+
+&lt;div id=&#34;objective&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Objective&lt;/h1&gt;
+&lt;p&gt;After reading the book “History of Codes” by Simon Singh, I was inspired to apply some of the things that I have learned in R. While the book describes the history of codes in terms of encrpyting and decrypting messages (e.g., for secret communication), I will focus on managing passwords. Please note that the following is written for fun and should not be interpreted as an attempt to develop a flawless password manager. It is rather my first try of writing an encryption function. I hope it is useful for generating passwords for conferences, journals, or shopping webpages.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;background&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Background&lt;/h1&gt;
+&lt;p&gt;Encryption can be seen as substituting letters. As an example, each of the 26 letters of the alphabet could be shifted by one letter. This would result in “A -&amp;gt; B”, “B -&amp;gt; C”, “C -&amp;gt; D” and so forth. Using this substitution algorithm, the encryption of my name “Markus” results in “Nbslvt”. In order to decipher the word “Nbslvt” back to “Markus” one would need the key, i.e., a table indicating how the letters have been substituted. Obviously, the “shifted-by-one-letter” cipher can be figured out quite easily by most amateur code breakers and is not very safe. Throughout history scientists came up with much more sophisticated cipher codes and cipher machines in order to keep communication private. Especially, during the first and second World War secret communication became crucial for the military. With the rapid expansion of the internet, encrypting messages was no longer only a matter for governments and the military but also relevant for ordinary individuals. In my opinion, one of the most fascinating encryption technique is the Rivest–Shamir–Adleman (RSA) cryptosystem. This breakthrough idea uses one-way functions (functions that cannot easily be inverted) and the practical difficulty of factoring two prime numbers. The algorithm is without a doubt as genius and geeky as it gets. This video gives a very vivid explanation: &lt;a href=&#34;https://www.youtube.com/watch?v=4zahvcJ9glg&#34;&gt;Eddie Woo YouTube&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;my-implementation-in-r&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;My implementation in R&lt;/h1&gt;
+&lt;p&gt;My idea is much more simple and relies on combining the substitution of letters with randomly selected numbers. In other words, I do not use an algorithm such as shifting the alphabet by &lt;span class=&#34;math inline&#34;&gt;\(x\)&lt;/span&gt; characters, as I have described above, but let the sample() function in R determine the substitution pattern. More specifically, each letter in the encrypted word will be based on its own sample() call. The word “Hallo”, for example, contains the letter “l” twice (third and forth element of the string). The sample() function might lead to a substitution of “l -&amp;gt; k” for the first “l” and the second “l” might be substituted with b (l -&amp;gt; b). This makes is much harder to break the encryption code because of the extremely high number of substitution possibilities. The key for the encryption function is the given by the set.seed() argument. The set.seed() function suspends the randomness in the sample() call and therefore allows transforming the letters back to their original order.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;the-choice-of-the-alphabet&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;The choice of the alphabet&lt;/h1&gt;
+&lt;p&gt;My alphabet includes all 26 letters (in lower- and upper-case spelling), the numbers &lt;span class=&#34;math inline&#34;&gt;\(0\)&lt;/span&gt; to &lt;span class=&#34;math inline&#34;&gt;\(9\)&lt;/span&gt;, and a selection of special characters (!§$%&amp;amp;/()=?@*#&amp;lt;&amp;gt;_-.;+{}[]). The code can be easily modified in order to incorporate more special characters, i.e., Germans might want a “ö”, while Danes require “ø”, and the French prefer “ô”.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;CipherWord &amp;lt;- function(my.password, my.key) {
+
+    set.seed(my.key)
+    the.length &amp;lt;- length(unlist(strsplit(my.password, &amp;quot;&amp;quot;)))
+    the.vec &amp;lt;- unlist(strsplit(my.password, &amp;quot;&amp;quot;))
+    specials &amp;lt;- c(unlist(strsplit(&amp;quot;!§$%&amp;amp;/()=?@*#&amp;lt;&amp;gt;_-.;+{}[]&amp;quot;, &amp;quot;&amp;quot;)))
+    all.characters &amp;lt;- c(letters, LETTERS, 0:9, specials)
+
+    if (!all(the.vec %in% all.characters)) {
+    stop(&amp;quot;unkown character(s) in password&amp;quot;)
+    }
+
+    cipher.list &amp;lt;- NULL
+    for (i in 1:the.length) {
+        cipher.frame &amp;lt;- data.frame(alphabet = all.characters)
+        cipher.frame$alphabet &amp;lt;- levels(droplevels(cipher.frame$alphabet))
+        cipher.frame$cipher.num &amp;lt;- sample(1:length(cipher.frame$alphabet), length(cipher.frame$alphabet))
+        cipher.frame$cipherbet &amp;lt;- cipher.frame[order(cipher.frame$cipher.num), ]$alphabet
+        cipher.list[[i]] &amp;lt;- cipher.frame
+    }
+
+    encrypted.password &amp;lt;- c()
+    for (j in 1:the.length) {
+        encrypted.letter &amp;lt;- unlist(strsplit(my.password, &amp;quot;&amp;quot;))[j]
+        encrypted.password[j] &amp;lt;- cipher.list[[j]]$cipherbet[match(encrypted.letter, cipher.list[[j]]$alphabet)]
+    }
+
+    count &amp;lt;- any(encrypted.password %in% specials) +
+        any(encrypted.password %in% letters) +
+        any(encrypted.password %in% LETTERS)
+
+    if(count!=3) {
+        warning(&amp;quot;Encryption does not include lower, upper, and special characters&amp;quot;)
+        }
+
+    out &amp;lt;- rbind(cbind(&amp;quot;Original&amp;quot;,&amp;quot;Encrypted&amp;quot;),cbind(my.password,
+             paste(encrypted.password,collapse=&amp;quot;&amp;quot;)))
+
+    return(out)
+}
+
+# basically copy and paste
+DecipherWord &amp;lt;- function(my.encrypted.word, my.key) {
+
+    set.seed(my.key)
+    the.length &amp;lt;- length(unlist(strsplit(my.encrypted.word, &amp;quot;&amp;quot;)))
+    the.vec &amp;lt;- unlist(strsplit(my.encrypted.word, &amp;quot;&amp;quot;))
+    specials &amp;lt;- c(unlist(strsplit(&amp;quot;!§$%&amp;amp;/()=?@*#&amp;lt;&amp;gt;_-.;+{}[]&amp;quot;, &amp;quot;&amp;quot;)))
+    all.characters &amp;lt;- c(letters, LETTERS, 0:9, specials)
+
+    if (!all(the.vec %in% all.characters)) {
+    stop(&amp;quot;unkown character(s) in the encrypted word&amp;quot;)
+    }
+
+    cipher.list &amp;lt;- NULL
+    for (i in 1:the.length) {
+        cipher.frame &amp;lt;- data.frame(alphabet = all.characters)
+        cipher.frame$alphabet &amp;lt;- levels(droplevels(cipher.frame$alphabet))
+        cipher.frame$cipher.num &amp;lt;- sample(1:length(cipher.frame$alphabet), length(cipher.frame$alphabet))
+        cipher.frame$cipherbet &amp;lt;- cipher.frame[order(cipher.frame$cipher.num), ]$alphabet
+        cipher.list[[i]] &amp;lt;- cipher.frame
+    }
+
+    decrypted.password &amp;lt;- c()
+    for (j in 1:the.length) {
+        decrypted.letter &amp;lt;- unlist(strsplit(my.encrypted.word, &amp;quot;&amp;quot;))[j]
+        decrypted.password[j] &amp;lt;- cipher.list[[j]]$alphabet[match(decrypted.letter, cipher.list[[j]]$cipherbet)]
+    }
+
+    out &amp;lt;- rbind(cbind(&amp;quot;Encrypted&amp;quot;,&amp;quot;Decrypted&amp;quot;),cbind(my.encrypted.word,
+             paste(decrypted.password,collapse=&amp;quot;&amp;quot;)))
+
+    return(out)
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;how-does-it-work&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;How does it work?&lt;/h1&gt;
+&lt;p&gt;Imagine you are accepted at a conference and the upload of the paper requires setting up an account with your Email address and a password. You would love to choose an easy word such as “EasyPassword” but you are aware that this is neither secure nor accepted by most webpages. With the functions that I have provided above, it is possible to transform “EasyPassword” to “Q/VX@ezlQptv”. The CipherWord() function requires the word that you would like to encrypt and a key number (for set.seed). The key number becomes the user’s personal encryption key. One option to use CipherWord() is remembering one personal key and choosing easy passwords such as “PasswordPAA2021” for PAA in 2021 or “PasswordEPC2022” for EPC in 2022. Alternatively, the user can keep the password constant but change the encryption key. The encryption key might be based on a fancy function, refer to the date of a given conference, or the session number of the presentation. In the following example, I encrypt “EasyPassword” with the key “123” to the much safer password “Q/VX@ezlQptv”. The DecipherWord() function reverses the encryption as long as the user knows the right key (“123” in the example). Accordingly, the function can also be used to inform close colleagues (with access to the encryption key) about the secret lunch date location ^_^&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;CipherWord(&amp;quot;EasyPassword&amp;quot;, 123)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##      my.password                  
+## [1,] &amp;quot;Original&amp;quot;     &amp;quot;Encrypted&amp;quot;   
+## [2,] &amp;quot;EasyPassword&amp;quot; &amp;quot;Q/VX@ezlQptv&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;DecipherWord(&amp;quot;Q/VX@ezlQptv&amp;quot;, 123)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##      my.encrypted.word               
+## [1,] &amp;quot;Encrypted&amp;quot;       &amp;quot;Decrypted&amp;quot;   
+## [2,] &amp;quot;Q/VX@ezlQptv&amp;quot;    &amp;quot;EasyPassword&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;the-challenge-of-password-requirements&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;The challenge of password requirements&lt;/h1&gt;
+&lt;p&gt;I encounter mostly webpages with the requirement of selecting a password that includes lower- and upper case letters as well as at least one special character. At the moment, the function CipherWord() gives you a warning in case this requirements are not met. It is also possible to modify the function in a way that it automatically forces this combination of letters whenever necessary. However, the empirical analysis shown below indicates that this issue is relatively rare. Especially, if the input word is not too short (choosing a relative long password is actually always a good idea). For this reason, I do not take any specific password requirements into account for the moment.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;specials &amp;lt;- c(unlist(strsplit(&amp;quot;!§$%&amp;amp;/()=?@*#&amp;lt;&amp;gt;_-.;+{}[]&amp;quot;, &amp;quot;&amp;quot;)))
+yes &amp;lt;- 0
+no &amp;lt;- 0
+
+for (i in 1:100) {
+    the.word &amp;lt;- CipherWord(&amp;quot;EasyPassword&amp;quot;, i)[2,2]
+    the.word &amp;lt;- unlist(strsplit(the.word, &amp;quot;&amp;quot;))
+
+    count &amp;lt;- any(the.word %in% specials) +
+        any(the.word %in% letters) +
+        any(the.word %in% LETTERS)
+
+    if (count==3) {
+        yes &amp;lt;- yes+1
+    }else{
+        no &amp;lt;- no+1
+    }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Warning in CipherWord(&amp;quot;EasyPassword&amp;quot;, i): Encryption does not include lower,
+## upper, and special characters
+
+## Warning in CipherWord(&amp;quot;EasyPassword&amp;quot;, i): Encryption does not include lower,
+## upper, and special characters
+
+## Warning in CipherWord(&amp;quot;EasyPassword&amp;quot;, i): Encryption does not include lower,
+## upper, and special characters
+
+## Warning in CipherWord(&amp;quot;EasyPassword&amp;quot;, i): Encryption does not include lower,
+## upper, and special characters&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;bars &amp;lt;- barplot(cbind(yes,no), col=&amp;quot;lightgray&amp;quot;,
+                main=&amp;quot;Include lower-, upper-, and specical characters?&amp;quot;,
+                cex.main=1.5
+                )
+text(bars, 40, paste(cbind(yes,no), &amp;quot;times&amp;quot;, &amp;quot; &amp;quot;), cex=1.5)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/crypto/index.en_files/figure-html/unnamed-chunk-3-1.png&#34; width=&#34;672&#34; /&gt;
+Now, the same procedure but with a longer input word (LongerPasswordsAreBetter).&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;yes &amp;lt;- 0
+no &amp;lt;- 0
+
+for (i in 1:100) {
+    the.word &amp;lt;- CipherWord(&amp;quot;LongerPasswordsAreBetter&amp;quot;, i)[2,2]
+    the.word &amp;lt;- unlist(strsplit(the.word, &amp;quot;&amp;quot;))
+
+    count &amp;lt;- any(the.word %in% specials) +
+        any(the.word %in% letters) +
+        any(the.word %in% LETTERS)
+
+    if (count==3) {
+        yes &amp;lt;- yes+1
+    }else{
+        no &amp;lt;- no+1
+    }
+}
+
+bars &amp;lt;- barplot(cbind(yes,no), col=&amp;quot;lightgray&amp;quot;,
+                main=&amp;quot;Include lower-, upper-, and specical characters?&amp;quot;,
+                cex.main=1.5
+                )
+text(bars, 40, paste(cbind(yes,no), &amp;quot;times&amp;quot;, &amp;quot; &amp;quot;), cex=1.5)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/crypto/index.en_files/figure-html/unnamed-chunk-4-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;references&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;References&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;Singh, Simon (2002). The Code Book: The Secret History of Codes and Code-Breaking. Harper Collins Publishers UK: (Reissue) Edition.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Reconstruction life table functions from life expectancy</title>
+      <link>/post/getting-started/</link>
+      <pubDate>Sun, 04 Jul 2021 00:00:00 +0000</pubDate>
+      <guid>/post/getting-started/</guid>
+      <description>&lt;h2 id=&#34;deriving-education-specific-life-tables-with-an-iterative-process&#34;&gt;Deriving education-specific life tables with an iterative process&lt;/h2&gt;
+&lt;p&gt;The life table survivors at age $x$ ($l_x$) can be obtained from life expectancy estimates at age $x$ ($e_x$) after assuming that in each age interval $x$ to $x+1$, people dying within this period live on average $1/2$ person-years ($a_x=0.5$):
+\begin{equation}
+l_{x+1}=\frac{l_x \cdot (2 \cdot e_x -1)}{1+2 \cdot e_{x+1}}.
+\end{equation}
+Please note, $l_0$ denotes the life table radix (usually defined as 100 000) and does not require estimation. Thus, the life table reconstruction starts with deriving $l_1$:
+\begin{equation}
+l_{1}=\frac{l_0 \cdot (2 \cdot e_0 -1)}{1+2 \cdot e_{1}}.
+\end{equation}
+In this way, the life table survivors at age 1 can be estimated from three known life table functions, i.e.,  $l_0$, $e_0$, and $e_1$. In the next step, $l_2$ is estimated from $l_1$, $e_1$, and $e_2$ and so forth. Once all $l_x$ are estimated on the basis of this algorithm, the remaining life table functions can be easily derived, such as $L_x$ ($L_x=(l_x+l_{x+1})/2)$. Theoretically, equation 1 enables us to reconstruct life table functions based on $e_x$ values (under the $a_x$ = 0.5 assumption). In practice, however, the reconstruction might require additional steps. For example, the $e_x$ values provided by Eurostat have only one decimal place. This limits the accuracy of the $l_x$ derivation and might result in constant $l_x$ values for several ages. To overcome this issue, we fitted a non-parametric curve to the data and predicted $e_x$ values with more decimal places. More specifically, we used the loess() function in R in order to obtain $e_x$ values with more decimal places that are as close as possible to the original $e_x$ values. In some cases, e.g., for the highly educated subpopulation in very low-mortality countries, the proposed derivation procedure still produces constant $l_x$ values at young ages. We solved this issue by focusing on $e_{30}$ and HLY at age 30.&lt;/p&gt;
+&lt;p&gt;The following code provides an example for calculating education-specific life tables when only the education-specific $e_x$ values are known. In other words, the aim of the code is to calculate the life table backwards, namely from $e_x$ to $p_x$. This is necessary because Eurostat does not provide education-specific life tables, but education-specific $e_x$ values are available. Please note, the results in this example will differ from the results in my paper (Sauerberg 2021) due to updates in the Eurostat database.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-r&#34;&gt;library(dplyr)
+library(eurostat)
+#please load these packages and download the data like this:
+data &amp;lt;- get_eurostat(&amp;quot;demo_mlexpecedu&amp;quot;, time_format = &amp;quot;num&amp;quot;)
+
+#rename and redefine the file 
+data$isced11 &amp;lt;- as.character(data$isced11)
+data$isced11 &amp;lt;- ifelse(data$isced11==&amp;quot;ED0-2&amp;quot;, &amp;quot;lower&amp;quot;, data$isced11)
+data$isced11 &amp;lt;- ifelse(data$isced11==&amp;quot;ED3_4&amp;quot;, &amp;quot;middle&amp;quot;, data$isced11)
+data$isced11 &amp;lt;- ifelse(data$isced11==&amp;quot;ED5-8&amp;quot;, &amp;quot;higher&amp;quot;, data$isced11)
+data$isced11 &amp;lt;- ifelse(data$isced11==&amp;quot;TOTAL&amp;quot;, &amp;quot;total&amp;quot;, data$isced11)
+
+data$age &amp;lt;- as.character(data$age)
+data$age &amp;lt;- ifelse(data$age==&amp;quot;Y_LT1&amp;quot;, &amp;quot;Y0&amp;quot;, data$age)
+data$age &amp;lt;- ifelse(data$age==&amp;quot;Y_GE85&amp;quot;, &amp;quot;Y85&amp;quot;, data$age)
+data$age &amp;lt;- substring(data$age, 2)
+
+data &amp;lt;- data[,-1]
+colnames(data) &amp;lt;- c(&amp;quot;sex&amp;quot;,&amp;quot;age&amp;quot;,&amp;quot;edu&amp;quot;,&amp;quot;country&amp;quot;,&amp;quot;year&amp;quot;,&amp;quot;ex&amp;quot;)
+data$age &amp;lt;- as.numeric(data$age)
+#Filter for the year 2016, as we have done
+data &amp;lt;- filter(data, year==2016)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The following function has the arguments &amp;ldquo;country.select&amp;rdquo;, &amp;ldquo;edu.select&amp;rdquo; and &amp;ldquo;sex.select&amp;rdquo;. Thus, the funcation allows to derive life tables for each educational level (high, middle, low, and total), for each country with available data (16 European countries), separated for men and women.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-r&#34;&gt;my.function &amp;lt;- function(country.select, edu.select, sex.select) {
+
+    select.country &amp;lt;- arrange(filter(data, country==country.select ,edu==edu.select &amp;amp;
+                                               sex==sex.select),age)
+
+#smooth to get more decimals by applying the loess function,
+#then predict ex with more decimals
+    grab.LE &amp;lt;- select.country$ex
+    smooth.it &amp;lt;- loess(grab.LE~select.country$age, span=0.2)
+    predict.it &amp;lt;- predict(smooth.it, seq(0,85,1))
+    select.country$ex.decimals &amp;lt;- predict.it
+
+    LT.derive &amp;lt;- data.frame(Age=0:85)
+    LT.derive$lx &amp;lt;- NA
+
+    LT.derive$ex &amp;lt;- select.country$ex.decimals
+    LT.derive$lx[1] &amp;lt;- 100000
+    LT.derive$Tx[1] &amp;lt;- 100000*select.country$ex.decimals[1]
+    
+#this loop refers to equation 1 in the paper
+    for (j in 2:86) {
+
+        upper &amp;lt;- LT.derive$lx[j-1]*(2*LT.derive$ex[j-1]-1)
+        bottom &amp;lt;- 1+2*LT.derive$ex[j]
+        LT.derive$lx[j] &amp;lt;- upper/bottom
+    }
+#Checks if lx is monotonic decreasing, i.e., no resurrection in the life table
+    lx.diff &amp;lt;- diff(LT.derive$lx)
+    lx.diff &amp;lt;- round(lx.diff, 5)
+
+    if (all(diff(lx.diff) &amp;lt; 0)) {
+
+        px &amp;lt;- c(LT.frame$lx[-1]/LT.frame$lx[-86],0)
+
+    }else{
+#sometimes, it is not, so I force it =)
+#please note, this occurs usually at very young ages and won&#39;t affect
+#LE at age 30 or older
+        lx.diff[lx.diff&amp;gt;=0] &amp;lt;- -runif(length(lx.diff[lx.diff&amp;gt;=0]), 1, 5)
+        lx.monotonic &amp;lt;- cumsum(c(100000, lx.diff))
+        px &amp;lt;- c(lx.monotonic[-1]/lx.monotonic[-86],0)
+
+        }
+#from here, the life table is constructed very standardly
+    lx &amp;lt;- round(c(100000, (cumprod(px)*100000)[1:(length(px)-1)]))
+    dx &amp;lt;- round(c(-diff(lx), lx[length(lx)]))
+    LT.derive$lx &amp;lt;- lx
+    LT.derive$dx &amp;lt;- dx
+    LT.derive$px &amp;lt;- px
+    Lx1 &amp;lt;- lx[-1]+0.5[-length(px)]*dx[-length(dx)]
+    Lx.open &amp;lt;- LT.derive$Tx[1]-sum(Lx1)
+    LT.derive$Lx &amp;lt;- round(c(Lx1, Lx.open))
+    LT.derive$Tx &amp;lt;- rev(cumsum(rev(LT.derive$Lx)))
+    LT.derive$ex.derived &amp;lt;- LT.derive$Tx/LT.derive$lx
+    LT.derive$ex.original &amp;lt;- select.country$ex
+    LT.derive$diff &amp;lt;- LT.derive$ex.original-LT.derive$ex.derived
+    LT.derive$Country &amp;lt;- country.select
+    LT.derive$Edu &amp;lt;- edu.select
+    LT.derive$Sex &amp;lt;- sex.select
+
+    return(LT.derive[,c(&amp;quot;Country&amp;quot;,&amp;quot;Edu&amp;quot;,&amp;quot;Sex&amp;quot;,&amp;quot;Age&amp;quot;,&amp;quot;px&amp;quot;,&amp;quot;lx&amp;quot;,&amp;quot;dx&amp;quot;,&amp;quot;Lx&amp;quot;,
+                        &amp;quot;Tx&amp;quot;,&amp;quot;ex.derived&amp;quot;,&amp;quot;ex.original&amp;quot;,&amp;quot;diff&amp;quot;)])
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The following code applies the function to all 16 European countries by educational attainment, stratified by sex.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-r&#34;&gt;#these are the country codes
+edu.countries &amp;lt;- c(&amp;quot;BG&amp;quot;,&amp;quot;DK&amp;quot;,&amp;quot;EE&amp;quot;,&amp;quot;EL&amp;quot;,&amp;quot;HR&amp;quot;,&amp;quot;IT&amp;quot;,&amp;quot;HU&amp;quot;, #CZ is currently not available
+                   &amp;quot;PL&amp;quot;,&amp;quot;PT&amp;quot;,&amp;quot;RO&amp;quot;,&amp;quot;SI&amp;quot;,&amp;quot;SK&amp;quot;,&amp;quot;FI&amp;quot;,&amp;quot;SE&amp;quot;,&amp;quot;NO&amp;quot;)
+
+
+###Females###
+out.females &amp;lt;- c()
+
+for (country.select in edu.countries) {
+
+    for (edu.select in c(&amp;quot;higher&amp;quot;,&amp;quot;middle&amp;quot;,&amp;quot;lower&amp;quot;)) {
+
+        out.females &amp;lt;- rbind(out.females,my.function(country.select, edu.select, &amp;quot;F&amp;quot;))
+}
+}
+
+
+###Males###
+out.males &amp;lt;- c()
+
+for (country.select in edu.countries) {
+
+    for (edu.select in c(&amp;quot;higher&amp;quot;,&amp;quot;middle&amp;quot;,&amp;quot;lower&amp;quot;)) {
+
+        out.males &amp;lt;- rbind(out.males,my.function(country.select, edu.select, &amp;quot;M&amp;quot;))
+}
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Finally, I plot the difference between the original $e_x$ and the derived $e_x$.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-r&#34;&gt;par(mfrow=c(3,3))
+for (edu in c(&amp;quot;higher&amp;quot;,&amp;quot;middle&amp;quot;,&amp;quot;lower&amp;quot;)) {
+    plot(1,1, type=&amp;quot;n&amp;quot;, xlim=c(1,16), ylim=c(-0.2,0.2),
+         main=paste(&amp;quot;Females&amp;quot;,edu,sep=&amp;quot; &amp;quot;), xlab=&amp;quot;Countries&amp;quot;,
+         ylab=&amp;quot;LE 30 original - LE30 derived&amp;quot;)
+    points(1:15,out.females$diff[out.females$Edu==edu &amp;amp; out.females$Age==30])
+    text(1:15,out.females$diff[out.females$Edu==edu &amp;amp; out.females$Age==30], 1:16,
+         label=out.females$Country[out.females$Edu==edu &amp;amp; out.females$Age==30])
+}
+
+for (edu in c(&amp;quot;higher&amp;quot;,&amp;quot;middle&amp;quot;,&amp;quot;lower&amp;quot;)) {
+    plot(1,1, type=&amp;quot;n&amp;quot;, xlim=c(1,16), ylim=c(-0.2,0.2),
+         main=paste(&amp;quot;Males&amp;quot;,edu,sep=&amp;quot; &amp;quot;), xlab=&amp;quot;Countries&amp;quot;,
+         ylab=&amp;quot;LE 30 original - LE30 derived&amp;quot;)
+    points(1:15,out.males$diff[out.males$Edu==edu &amp;amp; out.males$Age==30])
+    text(1:15,out.males$diff[out.males$Edu==edu &amp;amp; out.males$Age==30], 1:16,
+         label=out.males$Country[out.males$Edu==edu &amp;amp; out.males$Age==30])
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id=&#34;complete-life-tables-by-age-and-education-stratified-by-women-and-men&#34;&gt;Complete life tables by age and education (stratified by women and men)&lt;/h2&gt;
+&lt;p&gt;This prints all the age- and education-specific life tables (the output it omitted).&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-r&#34;&gt;library(knitr)
+
+table.fun &amp;lt;- function(country.select) {
+    
+    print(
+        kable(filter(out.females, Country==country.select &amp;amp; Edu==&amp;quot;higher&amp;quot;),
+              digits=4, caption=paste(&amp;quot;Life table for high-educated women in&amp;quot;,
+                                      country.select,&amp;quot;, 2016&amp;quot;,sep=&amp;quot; &amp;quot;)) 
+        )
+    print(
+        kable(filter(out.females, Country==country.select &amp;amp; Edu==&amp;quot;middle&amp;quot;),
+              digits=4, caption=paste(&amp;quot;Life table for middle-educated women in&amp;quot;,
+                                      country.select,&amp;quot;, 2016&amp;quot;,sep=&amp;quot; &amp;quot;)) 
+          )
+    print(
+        kable(filter(out.females, Country==country.select &amp;amp; Edu==&amp;quot;lower&amp;quot;),
+              digits=4, caption=paste(&amp;quot;Life table for low-educated women in&amp;quot;,
+                                      country.select,&amp;quot;, 2016&amp;quot;,sep=&amp;quot; &amp;quot;))
+        )
+
+    print(
+        kable(filter(out.males, Country==country.select &amp;amp; Edu==&amp;quot;higher&amp;quot;),
+              digits=4, caption=paste(&amp;quot;Life table for high-educated men in&amp;quot;,
+                                      country.select,&amp;quot;, 2016&amp;quot;,sep=&amp;quot; &amp;quot;)) 
+            )
+    
+    print(
+        kable(filter(out.males, Country==country.select &amp;amp; Edu==&amp;quot;middle&amp;quot;),
+              digits=4, caption=paste(&amp;quot;Life table for middle-educated men in&amp;quot;,
+                                      country.select,&amp;quot;, 2016&amp;quot;,sep=&amp;quot; &amp;quot;)) 
+            )
+    print(
+        kable(filter(out.males, Country==country.select &amp;amp; Edu==&amp;quot;lower&amp;quot;),
+              digits=4, caption=paste(&amp;quot;Life table for low-educated men in&amp;quot;,
+                                      country.select,&amp;quot;, 2016&amp;quot;,sep=&amp;quot; &amp;quot;)) 
+            )    
+}
+
+for (country in edu.countries) {
+    table.fun(country)  
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id=&#34;references&#34;&gt;References&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Sauerberg, M. (2021). The imapact of population&amp;rsquo;s educational attainment on Healthy Life Years in Europe: An empirical illustration of 16 European countries. SSM - Population Health, 15(100857).&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

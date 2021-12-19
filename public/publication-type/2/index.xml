@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>2 | Markus Sauerberg</title>
+    <link>/publication-type/2/</link>
+      <atom:link href="/publication-type/2/index.xml" rel="self" type="application/rss+xml" />
+    <description>2</description>
+    <generator>Wowchemy (https://wowchemy.com)</generator><language>en-us</language><lastBuildDate>Thu, 22 Jul 2021 00:00:00 +0000</lastBuildDate>
+    <image>
+      <url>/media/icon_hua2ec155b4296a9c9791d015323e16eb5_11927_512x512_fill_lanczos_center_2.png</url>
+      <title>2</title>
+      <link>/publication-type/2/</link>
+    </image>
+    
+    <item>
+      <title>Human costs of the first wave of the COVID-19 pandemic in the major epicenters in Italy</title>
+      <link>/publication/vyrb/</link>
+      <pubDate>Thu, 22 Jul 2021 00:00:00 +0000</pubDate>
+      <guid>/publication/vyrb/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>The impact of population&#39;s educational composition on Healthy Life Years: An empirical illustration of 16 European countries</title>
+      <link>/publication/hlyedu/</link>
+      <pubDate>Sat, 26 Jun 2021 00:00:00 +0000</pubDate>
+      <guid>/publication/hlyedu/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>The cross-sectional average length of healthy life (HCAL): a measure that summarizes the history of cohort health and mortality</title>
+      <link>/publication/hcal/</link>
+      <pubDate>Mon, 31 Aug 2020 00:00:00 +0000</pubDate>
+      <guid>/publication/hcal/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Life Expectancy: Frequently Used, but Hardly Understood</title>
+      <link>/publication/le/</link>
+      <pubDate>Wed, 07 Aug 2019 00:00:00 +0000</pubDate>
+      <guid>/publication/le/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>
