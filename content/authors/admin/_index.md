@@ -23,8 +23,8 @@ interests:
 - Life table techniques
 - Data vizualisation
 organizations:
-- name: Wittgenstein Centre for Demography and Global Human Capital (OeAW, IIASA, University of Vienna)
-  url: http://www.wittgensteincentre.org/en/index.htm
+- name: Federal Institute for Population Research
+  url: http://www.bib-bund.de
 role: Research Scientist
 social:
 - icon: envelope
@@ -43,7 +43,7 @@ superuser: yes
 bio:    
 ---
 
-I joined the research group "Health & Longevity" at the Vienna Institute of Demography in August 2017. My work focuses on the measurement of health and mortality. This webpage includes mainly information on my research but I might also post about not work-related topics.
+My research interest focuses generally on analyzing and understanding health and mortality levels and trends. I am a big R fan and enjoy causal coding and data vizualisation. Further, the methodological challanges of measuring health and mortality caught my interest. This webpage includes mainly information on my research but I might also post about not work-related topics.
 
 
 

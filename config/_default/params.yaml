@@ -20,19 +20,19 @@ twitter: ''
 
 # Contact (edit or remove options as required)
 
-email: markus.sauerberg@oeaw.ac.at
+email: markus.sauerberg@bib.bund.de
 phone: false
 address:
-  street: Vordere Zollamststr. 3
-  city: Vienna
-  region: Vienna
-  postcode: '1030'
-  country: Austria
-  country_code: AT
+  street: Friedrich-Ebert-Allee 4
+  city: Wiesbaden
+  region: Wiesbaden
+  postcode: '65185'
+  country: Germany
+  country_code: DE
 coordinates:
-  latitude: '48.209730'
-  longitude: '16.385044'
-directions: Enter Building and take the stairs to first Floor
+  latitude: '50.07657002698368'
+  longitude: '8.245793582794821'
+directions: Enter Building and take the stairs to second Floor
 office_hours: false
 appointment_url: false
 contact_links:
