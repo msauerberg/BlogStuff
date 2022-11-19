@@ -1,6 +1,6 @@
 ---
 title: "Comparing Cohort Survival in Good Health: A Research Note on Decomposing Sex Differentials in the United States"
-date: 2022-11-17
+date: 2022-11-19
 publishDate: 2022-11-17
 authors: ["Markus Sauerberg", "Vladimir Canudas-Romo"]
 publication_types: ["2"]
