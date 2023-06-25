@@ -1,7 +1,7 @@
 ---
 title: "Different health systems – Different mortality outcomes? Regional disparities in avoidable mortality across German-speaking Europe, 1992–2019"
-date: 2023-07-01
-publishDate: 2023-07-23
+date: 2023-06-01
+publishDate: 2023-06-23
 authors: ["Michael Mühlichen", "Mathias Lerch", "Markus Sauerberg", "Pavel Grigoriev"]
 publication_types: ["2"]
 abstract: "Evaluating the impact of health systems on premature mortality across different countries is a very challenging task, as it is hardly possible to disentangle it from the influence of contextual factors such as cultural differences. In this respect, the German-speaking area in Central Europe (Austria, Germany, South Tyrol and large parts of Switzerland) represents a unique ‘natural experiment’ setting: While being exposed to different health policies, they share a similar culture and language. To assess the impact of different health systems on mortality differentials across the German-speaking area, we relied on the concept of avoidable mortality. Based on official mortality statistics, we aggregated causes of death below age 75 that are either 1) amenable to health care or 2) avoidable through primary prevention. We calculated standardised death rates and constructed cause-deleted life tables for 9 Austrian, 96 German, 1 Italian and 5 Swiss regions from 1992 to 2019, harmonised according to the current territorial borders.
